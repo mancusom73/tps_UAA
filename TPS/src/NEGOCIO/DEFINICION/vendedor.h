@@ -1,0 +1,6 @@
+#ifndef VENDEDOR_H
+#define VENDEDOR_H
+void PEDIR_VENDEDOR();
+void PEDIR_MOZO();
+void PEDIR_VENDEDOR_SI_ES_NECESARIO();
+#endif

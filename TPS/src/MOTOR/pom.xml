@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<?xml-stylesheet type="text/xsl" href="pom.xsl"?> 
+<project>
+
+  <!-- The Basics -->
+  <groupId>promo</groupId>
+  <artifactId>libpromo</artifactId>
+  <version> 
+    <field order="1" >1</field> 
+    <field order="2" >12</field> 
+    <field order="3" >22</field>  
+    <field order="4" >26</field> 
+  </version>
+  <packaging>lib</packaging>
+
+  <dependencies/>
+
+  <parent></parent>
+  <modules></modules>
+  <properties></properties>
+
+
+  <!-- More Project Information -->
+  <name>LIB_PROMO</name>
+  <description>Librerías del Motor de Promociones</description>
+  <url></url>
+  <inceptionYear></inceptionYear>
+  <licenses></licenses>
+  <organization>INVEL Latinoamericana S.A.</organization>
+  <developers>...</developers>
+  <contributors>...</contributors>
+
+  <!-- Environment Settings -->
+  <issueManagement>...</issueManagement>
+  <ciManagement>...</ciManagement>
+  <mailingLists>...</mailingLists>
+  <scm>...</scm>
+  <prerequisites>...</prerequisites>
+  <repositories>...</repositories>
+  <pluginRepositories>...</pluginRepositories>
+  <distributionManagement>...</distributionManagement>
+  <profiles>...</profiles>
+</project>
+

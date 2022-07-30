@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="pom.xsl"?>
+<project>
+	<!-- The Basics -->
+	<groupId>tpviv</groupId>
+	<artifactId>tpviv</artifactId>
+	<version>
+		<field order="1">03</field>
+		<field order="2">000</field>
+	</version>
+	<packaging>exe</packaging>
+
+	<dependencies>
+		<dependency>
+			<groupId>tpviv</groupId>
+			<artifactId>libs-all</artifactId>
+			<version>
+				<field order="1" valid="equal">5</field>
+				<field order="2" valid="min"  >0</field>
+			</version>
+			<branch>01_prueba</branch>
+			<path>lib</path>
+			<type>lib</type>
+			<scope>runtime</scope>
+			<optional>false</optional>
+		</dependency>
+		<dependency>
+			<groupId>tpviv</groupId>
+			<artifactId>datos_std</artifactId>
+			<version>
+				<field order="1" valid="equal">4</field>
+				<field order="2" valid="min"  >1</field>
+			</version>
+			<path>../../TPVSIS</path>
+			<type>data</type>
+			<scope>runtime</scope>
+			<optional>false</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>promo</groupId>
+			<artifactId>libpromo</artifactId>
+			<version>
+				<field order="1" valid="equal">1</field>
+				<field order="2" valid="equal">12</field>
+				<field order="3" valid="min">19</field>
+				<field order="4" valid="any">22</field>
+			</version>
+			<branch/>
+			<path>../src/MOTOR</path>
+			<type>lib</type>
+			<scope>compile</scope>
+			<optional>false</optional>
+		</dependency>
+
+	</dependencies>
+
+	<parent/>
+	<modules/>
+	<properties/>
+
+	<!-- More Project Information -->
+	<name>TPVIV</name>
+	<description>TPVIV</description>
+	<url/>
+	<inceptionYear/>
+	<licenses/>
+	<organization>INVEL Latinoamericana S.A.</organization>
+	<developers>...</developers>
+	<contributors>...</contributors>
+
+	<!-- Environment Settings -->
+	<issueManagement>...</issueManagement>
+	<ciManagement>...</ciManagement>
+	<mailingLists>...</mailingLists>
+	<scm>...</scm>
+	<prerequisites>...</prerequisites>
+	<repositories>...</repositories>
+	<pluginRepositories>...</pluginRepositories>
+	<distributionManagement>...</distributionManagement>
+	<profiles>...</profiles>
+</project>

@@ -1,0 +1,15 @@
+#ifndef CARGA_H
+#define CARGA_H
+void CARGAR_CONFIG();
+int CARGAR_MEDIOS_DE_PAGO();
+void SN_TO_BIN( char *buffer, int cantidad );
+int CARGAR_IMPUESTOS();
+int CARGAR_IVA();
+int OBTENER_COD_IVA_INICIAL();
+int CARGAR_DPTOS();
+int CARGAR_TIPO_ENVASES();
+void AGRUPAR_ENVASES();
+int CARGAR_TIPOS_DE_ENVASES();
+int CARGAR_COBROS_ESPECIALES( void );
+int OBTENER_COD_IVA_INICIAL( void );
+#endif

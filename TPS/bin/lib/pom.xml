@@ -1,0 +1,38 @@
+<project>
+
+  <!-- The Basics -->
+  <groupId>tpviv</groupId>
+  <artifactId>libs-all</artifactId>
+  <!--version>1.11.17.19</version-->
+  <version>
+        <field order="1" >5</field>
+        <field order="2" >0</field>
+  </version>
+  <branch>01_prueba</branch>
+  <packaging>lib</packaging>
+  <dependencies></dependencies>
+  <parent>tpviv</parent>
+
+
+  <!-- More Project Information -->
+  <name>...</name>
+  <description>...</description>
+  <url>...</url>
+  <inceptionYear>...</inceptionYear>
+  <licenses>...</licenses>
+  <organization>...</organization>
+  <developers>...</developers>
+  <contributors>...</contributors>
+
+  <!-- Environment Settings -->
+  <issueManagement>...</issueManagement>
+  <ciManagement>...</ciManagement>
+  <mailingLists>...</mailingLists>
+  <scm>...</scm>
+  <prerequisites>...</prerequisites>
+  <repositories>...</repositories>
+  <pluginRepositories>...</pluginRepositories>
+  <distributionManagement>...</distributionManagement>
+  <profiles>...</profiles>
+</project>
+

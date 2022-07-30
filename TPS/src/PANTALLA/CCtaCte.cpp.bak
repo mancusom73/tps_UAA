@@ -1,0 +1,1360 @@
+/*Ejemplo del xml
+<?xml version="1.0" encoding="UTF-8"?>
+<desktop xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="screencfg.xsd">
+<lugares>
+	<estado name="ventas" id= "Pegasus"/>
+	<estado name= "pagos" id= "Pegasus"/>
+	<estado name= "cobros" id= "TPS"/>
+</lugares>	
+</desktop>
+
+*/
+
+#include "CScreencfg.h"
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <list>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
+//#include <ini.h>//Esta dependencia da error en archivos cpp, se agrega dependencia cr_var.h para declarar struct _config_tps
+#include <_cr_var.h>
+#ifdef INVEL_W
+#define ELOOP                   WSAELOOP
+#endif
+
+extern "C" {
+#define LOG_INCONDICIONAL   24  //si lo queremos loguear si o si
+void SET_VALORES_CTACTE(int ventas, int pagos, int cobros, char * sp, char * tabla, int * campos);
+void SET_VALORES_PROMO(long _articulo_descarga, char *articulo_descarga_barra,int _activa,int _cod_lista,
+     int _controlacliente, long _art_descarga_defecto, char *art_descarga_barra_defecto, char *art_descarga_desc_defecto
+     ,int promo_inmediata ,char *msj_tecla13_promo_inmediata, int promo_detallada );
+void glog( char *men, int origen, int nivel );
+void SET_VALORES_CONFIG_TPS(struct _config_tps *auxi);
+char * _strupr( char *s );
+void TRIM( char *cadena );
+void LTRIM( char *cadena );
+}
+
+void  CConfigTPS::GetConfig_tps( struct _config_tps *auxi )
+{
+	int h = 0;
+	
+	auxi->versionxml = auxconfig.versionxml;
+	auxi->activarTFpermanente = auxconfig.activarTFpermanente;
+	if( auxi->activarTFpermanente ) {
+		strncpy(auxi->NombreCliente, auxconfig.NombreCliente,sizeof(auxconfig.NombreCliente)) ;
+		strncpy(auxi->DniCliente, auxconfig.DniCliente,sizeof(auxconfig.DniCliente)) ;
+		auxi->encabezadoTF = auxconfig.encabezadoTF;
+	}
+	auxi->activarLecturaClienteBarra = auxconfig.activarLecturaClienteBarra;
+	if( auxi->activarLecturaClienteBarra ) {
+		strncpy(auxi->Prefijo_scanner_cliente, auxconfig.Prefijo_scanner_cliente,sizeof(auxconfig.Prefijo_scanner_cliente));
+		auxi->DetectarPrefijoCliente = auxconfig.DetectarPrefijoCliente;
+	}
+	auxi->PedirDatoAdicionalCierre = auxconfig.PedirDatoAdicionalCierre;
+	if( auxi->PedirDatoAdicionalCierre ) {
+		for( h = 0;h < 9;h++ ) {
+			if( auxconfig.CierreMedio[h] 
+					&& auxconfig.DatoAdicionalMedio[h] 
+					&& strlen( auxconfig.DatoAdiBusquedaMedio[h] ) ) {
+				auxi->CierreMedio[h] = auxconfig.CierreMedio[h];
+				auxi->DatoAdicionalMedio[h] = auxconfig.DatoAdicionalMedio[h];
+				strncpy(auxi->DatoAdiBusquedaMedio[h], auxconfig.DatoAdiBusquedaMedio[h],sizeof(auxi->DatoAdiBusquedaMedio[h]));		
+			}
+		}
+	}
+	auxi->ControlarLimiteVenta = auxconfig.ControlarLimiteVenta;
+	if( auxi->ControlarLimiteVenta ) {
+		auxi->BloquearAlSuperaLimiteVenta = auxconfig.BloquearAlSuperaLimiteVenta;
+		strncpy(auxi->MsjTecla_BloquearAlSuperaLimiteVenta, auxconfig.MsjTecla_BloquearAlSuperaLimiteVenta,100);	
+		auxi->PermitirNCsuperadoLimiteVenta = auxconfig.PermitirNCsuperadoLimiteVenta;
+	}
+	auxi->ControlarEnvases = auxconfig.ControlarEnvases;
+	if( auxi->ControlarEnvases == 1 ) {
+		auxi->AutorizarEnvases = auxconfig.AutorizarEnvases;
+		auxi->ControlarDevolucionEnvases = auxconfig.ControlarDevolucionEnvases;
+		strncpy(auxi->MsjTecla_i_EnvasesSinDevolver, auxconfig.MsjTecla_i_EnvasesSinDevolver,100) ;
+		strncpy(auxi->MsjTecla_AutorizarEnvases, auxconfig.MsjTecla_AutorizarEnvases,sizeof(auxi->MsjTecla_AutorizarEnvases)) ;
+	}
+	auxi->ValidarArticuloPesable = auxconfig.ValidarArticuloPesable;
+	if( auxi->ValidarArticuloPesable == 1 ) {
+		auxi->PedirSuperMenorMinimoPeso = auxconfig.PedirSuperMenorMinimoPeso;
+		auxi->PedirSuperMenorMinimoImporte = auxconfig.PedirSuperMenorMinimoImporte;
+		auxi->PedirSuperIngresoPesoManual = auxconfig.PedirSuperIngresoPesoManual;
+	}
+	auxi->ControlarCtaCte = auxconfig.ControlarCtaCte;
+	if( auxi->ControlarCtaCte == 1 ){
+		auxi->ClienteCtaCtePagos = auxconfig.ClienteCtaCtePagos;
+	}
+	auxi->ModalidadOffline = auxconfig.ModalidadOffline;
+	if( auxi->ModalidadOffline == 1 ){
+		auxi->VerificarRedCadaXEventos = auxconfig.VerificarRedCadaXEventos;
+		for( h = 0;h < 9;h++ ) {
+			if( auxconfig.VerificarRedEnTipoEvento[h] ) {
+				auxi->VerificarRedEnTipoEvento[h] = auxconfig.VerificarRedEnTipoEvento[h];
+			}
+		}
+	}
+	auxi->ModalidadInventario = auxconfig.ModalidadInventario;
+	if( auxi->ModalidadInventario == 1 ) {
+		auxi->ImprimirInventarioReducido = auxconfig.ImprimirInventarioReducido;
+		auxi->CodigoValidacionInventario = auxconfig.CodigoValidacionInventario;
+	}
+	auxi->ControlarRetiro = auxconfig.ControlarRetiro;
+	if( auxi->ControlarRetiro == 1 ) {
+		auxi->PedirConfirmacionRetiroExcedido = auxconfig.PedirConfirmacionRetiroExcedido;
+	}
+	auxi->ComprobanteAnulado = auxconfig.ComprobanteAnulado;
+	if( auxi->ComprobanteAnulado == 1 ) {
+		auxi->ImprimirComprobanteAnulado = auxconfig.ImprimirComprobanteAnulado;
+		auxi->VoucherComprobanteAnulado = auxconfig.VoucherComprobanteAnulado;
+	}
+	auxi->NotificacionUbuntu = auxconfig.NotificacionesUbuntu;
+	auxi->ControlarMediosDePago = auxconfig.ControlarMediosDePago;
+	if( auxi->ControlarMediosDePago == 1 ) {
+		auxi->AgruparMediosEnImpresion = auxconfig.AgruparMediosEnImpresion;
+		auxi->CantMediosPermitidos = auxconfig.CantMediosPermitidos;
+		auxi->InformarMediosExcedidos = auxconfig.InformarMediosExcedidos;
+	}
+	auxi->ListaPrecioxCliente = auxconfig.ListaPrecioxCliente;
+	if(auxi->ListaPrecioxCliente == 1) {
+		auxi->PedirAutorizacionTecla = auxconfig.PedirAutorizacionTecla ;
+		auxi->PedirAutorizacionCliente = auxconfig.PedirAutorizacionCliente;
+		memcpy(auxi->ListasAutorizacion , auxconfig.ListasAutorizacion, 10*sizeof(int));
+
+	}
+	/*auxi->NoMultiplicarConDecimales = auxconfig.NoMultiplicarConDecimales;
+	if( auxi->NoMultiplicarConDecimales == 1 ) {
+		for( h = 0; h < 20; h++ ) {
+			memset(auxi->UnidadesNOpermitidas[h],0, sizeof(auxconfig.UnidadesNOpermitidas[h]));
+			TRIM(auxconfig.UnidadesNOpermitidas[h]);
+			LTRIM(auxconfig.UnidadesNOpermitidas[h]);
+			strncpy(auxi->UnidadesNOpermitidas[h], auxconfig.UnidadesNOpermitidas[h], sizeof(auxconfig.UnidadesNOpermitidas[h]));
+		}
+	}*/
+	auxi->SoloPesablesCondecimales = auxconfig.SoloPesablesCondecimales;
+	auxi->Informes = auxconfig.Informes;
+	if( auxi->Informes == 1 ) {
+		auxi->ImprimirInformeYenZ = auxconfig.ImprimirInformeYenZ;
+	}
+	auxi->LecturaUsuarioBarra = auxconfig.LecturaUsuarioBarra;
+	if( auxi->LecturaUsuarioBarra  == 1 ) {
+		strncpy(auxi->PrefijoScannerSupervisor, auxconfig.PrefijoScannerSupervisor,sizeof(auxconfig.PrefijoScannerSupervisor));
+		auxi->DetectarPrefijoSupervisor = auxconfig.DetectarPrefijoSupervisor;
+	}
+	auxi->ListaPrecioPermanente = auxconfig.ListaPrecioPermanente;
+	if( auxi->ListaPrecioPermanente == 1 ) {
+		auxi->CodigoListaPrecio= auxconfig.CodigoListaPrecio;
+	}
+	auxi->AlicuotasEnArticulo = auxconfig.AlicuotasEnArticulo;
+	if( auxi->AlicuotasEnArticulo == 1 ) {
+		auxi->ModificarAlicuotaDeArticuloConsFinal= auxconfig.ModificarAlicuotaDeArticuloConsFinal;
+	}
+	auxi->SupervisorNoMultiplicables  = auxconfig.SupervisorNoMultiplicables;
+
+	SET_VALORES_CONFIG_TPS(auxi);
+
+}
+
+CConfigTPS::CConfigTPS( string xmlname )
+{
+
+  //struct stat fileStatus;
+  errno = 0;
+  char cadena2[100];
+  char msj[100];//UnidadesNOpermitidas[100];
+  int h = 0;
+  memset(&auxconfig,0, sizeof(struct _config_tps2));
+  memset(cadena2,0, sizeof(cadena2));
+  memset(msj,0, sizeof(msj));
+  //memset(UnidadesNOpermitidas,0, sizeof(UnidadesNOpermitidas));
+
+  /*if(stat(xmlname.c_str(), &fileStatus) == -1) // ==0 ok; ==-1 error
+  {
+
+	  if( errno == ENOENT )      // errno declared by include file errno.h
+         throw ( std::runtime_error("Path file_name does not exist, or path is an empty string.") );
+      else if( errno == ENOTDIR )
+         throw ( std::runtime_error("A component of the path is not a directory."));
+      else if( errno == ELOOP )
+         throw ( std::runtime_error("Too many symbolic links encountered while traversing the path."));
+      else if( errno == EACCES )
+         throw ( std::runtime_error("Permission denied."));
+      else if( errno == ENAMETOOLONG )
+         throw ( std::runtime_error("File can not be read\n"));
+  }*/
+  // Configure DOM parser.
+	try {
+        XMLPlatformUtils::Initialize();
+    }
+    catch( const XMLException &toCatch ) {
+        char *message = XMLString::transcode( toCatch.getMessage() );
+        cout << "Error during initialization! :\n" << message << "\n";
+        XMLString::release( &message );
+        error = INITIALIZE_ERR;
+        return;
+    }
+
+	parser = new XercesDOMParser();
+    parser->setValidationScheme( XercesDOMParser::Val_Always );    // optional.
+    parser->setDoNamespaces( true );    // optional
+
+    errHandler = ( ErrorHandler * ) new HandlerBase();
+    parser->setErrorHandler( errHandler );
+
+     try {
+        parser->parse( xmlname.c_str() );
+    }
+    catch( const XMLException &toCatch ) {
+        char *message = XMLString::transcode( toCatch.getMessage() );
+        cout << "Exception message is: \n" << message << "\n";
+        XMLString::release( &message );
+        error = PARSE_ERR;
+        return;
+    }
+    catch( const DOMException &toCatch ) {
+        char *message = XMLString::transcode( toCatch.msg );
+        cout << "Exception message is: \n" << message << "\n";
+        XMLString::release( &message );
+        error = DOM_ERR;
+        return;
+    }
+    catch( ... ) {
+        cout << "Unexpected Exception \n" ;
+        error = UNKNOWN_ERR;
+        return;
+    }
+
+
+   TAG_root        = XMLString::transcode("root");
+	TAG_VersionXml = XMLString::transcode("VersionXml");
+   TAG_SeteosTPS = XMLString::transcode("SeteosTPS");
+	TAG_Funcionalidades = XMLString::transcode("Funcionalidades");
+	TAG_TicketFacturaPermanente = XMLString::transcode("TicketFacturaPermanente");
+	TAG_LecturaClienteBarra = XMLString::transcode("LecturaClienteBarra");
+	TAG_PedirDatoAdicionalCierre = XMLString::transcode("PedirDatoAdicionalCierre");
+	TAG_ControlarLimiteVenta = XMLString::transcode("ControlarLimiteVenta");
+	TAG_ControlarEnvases = XMLString::transcode("ControlarEnvases");
+	TAG_ValidarArticuloPesable = XMLString::transcode("ValidarArticuloPesable");
+	TAG_ControlarCtaCte = XMLString::transcode("ControlarCtaCte");
+	TAG_ModalidadOffline = XMLString::transcode("ModalidadOffline");
+	TAG_ModalidadInventario = XMLString::transcode("ModalidadInventario");
+	TAG_ControlarRetiro = XMLString::transcode("ControlarRetiro");
+	TAG_ComprobanteAnulado = XMLString::transcode("ComprobanteAnulado");
+	TAG_NotificacionesUbuntu = XMLString::transcode("NotificacionesUbuntu");
+	TAG_ControlarMediosDePago = XMLString::transcode("ControlarMediosDePago");
+	TAG_ListaPrecioxCliente = XMLString::transcode("ListaPrecioxCliente");
+	//TAG_NoMultiplicarConDecimales = XMLString::transcode("NoMultiplicarConDecimales");
+	TAG_SoloPesablesCondecimales = XMLString::transcode("SoloPesablesCondecimales");
+	TAG_Informes = XMLString::transcode("Informes");
+	TAG_LecturaUsuarioBarra = XMLString::transcode("LecturaUsuarioBarra");
+	TAG_ListaPrecioPermanente= XMLString::transcode("ListaPrecioPermanente");
+	TAG_AlicuotasEnArticulo= XMLString::transcode("AlicuotasEnArticulo");
+	TAG_SupervisorNoMultiplicables= XMLString::transcode("SupervisorNoMultiplicables");
+
+
+	ATTR_Version = XMLString::transcode("Version");
+	ATTR_TicketFacturaPermanente = XMLString::transcode("TicketFacturaPermanente");
+	ATTR_LecturaClienteBarra= XMLString::transcode("LecturaClienteBarra");
+	ATTR_NombreCliente = XMLString::transcode("NombreCliente");
+    ATTR_DniCliente = XMLString::transcode("DniCliente");
+	ATTR_Prefijo_scanner_cliente = XMLString::transcode("Prefijo_scanner_cliente");
+	ATTR_EncabezadoTF = XMLString::transcode("EncabezadoTF");
+	ATTR_BloquearAlSuperaLimiteVenta = XMLString::transcode("BloquearAlSuperaLimiteVenta");
+	ATTR_MsjTecla_BloquearAlSuperaLimiteVenta = XMLString::transcode("MsjTecla_BloquearAlSuperaLimiteVenta");
+	ATTR_ControlarDevolucionEnvases = XMLString::transcode("ControlarDevolucionEnvases");
+	ATTR_MsjTecla_i_EnvasesSinDevolver = XMLString::transcode("MsjTecla_i_EnvasesSinDevolver");
+	ATTR_PedirSuperMenorMinimoPeso = XMLString::transcode("PedirSuperMenorMinimoPeso");
+	ATTR_PedirSuperMenorMinimoImporte = XMLString::transcode("PedirSuperMenorMinimoImporte");
+	ATTR_PedirSuperIngresoPesoManual = XMLString::transcode("PedirSuperIngresoPesoManual");
+	ATTR_AutorizarEnvases = XMLString::transcode("AutorizarEnvases");	
+	ATTR_MsjTecla_AutorizarEnvases = XMLString::transcode("MsjTecla_AutorizarEnvases");
+	ATTR_ClienteCtaCtePagos= XMLString::transcode("ClienteCtaCtePagos");
+	ATTR_VerificarRedCadaXEventos = XMLString::transcode("VerificarRedCadaXEventos");
+	ATTR_ImprimirInventarioReducido = XMLString::transcode("ImprimirInventarioReducido");
+	ATTR_CodigoValidacionInventario = XMLString::transcode("CodigoValidacionInventario");
+	ATTR_PedirConfirmacionRetiroExcedido = XMLString::transcode("PedirConfirmacionRetiroExcedido");
+	ATTR_ImprimirComprobanteAnulado = XMLString::transcode("ImprimirComprobanteAnulado");
+	ATTR_VoucherComprobanteAnulado = XMLString::transcode("VoucherComprobanteAnulado");
+	ATTR_AgruparMediosEnImpresion = XMLString::transcode("AgruparMediosEnImpresion");
+	ATTR_CantMediosPermitidos = XMLString::transcode("CantMediosPermitidos");
+	ATTR_InformarMediosExcedidos = XMLString::transcode("InformarMediosExcedidos");
+	ATTR_PermitirNCsuperadoLimiteVenta = XMLString::transcode("PermitirNCsuperadoLimiteVenta");
+	ATTR_PedirAutorizacionTecla = XMLString::transcode("PedirAutorizacionTecla");
+	ATTR_PedirAutorizacionCliente = XMLString::transcode("PedirAutorizacionCliente");
+	ATTR_ListasAutorizacion = XMLString::transcode("ListasAutorizacion");
+	//ATTR_UnidadesNOpermitidas = XMLString::transcode("UnidadesNOpermitidas");
+	ATTR_ImprimirInformeYenZ = XMLString::transcode("ImprimirInformeYenZ");
+    ATTR_DetectarPrefijoCliente = XMLString::transcode("DetectarPrefijoCliente");
+	ATTR_PrefijoScannerSupervisor = XMLString::transcode("PrefijoScannerSupervisor");
+	ATTR_DetectarPrefijoSupervisor = XMLString::transcode("DetectarPrefijoSupervisor");
+	ATTR_CodigoListaPrecio= XMLString::transcode("CodigoListaPrecio");
+	ATTR_ModificarAlicuotaDeArticuloConsFinal= XMLString::transcode("ModificarAlicuotaDeArticuloConsFinal");
+	
+
+
+	char * Medio[] = {"Medio1", "Medio2", "Medio3",	"Medio4", "Medio5", "Medio6", "Medio7", "Medio8", "Medio9"};
+	char * DatoAdicionalMedio[] = {"DatoAdicionalMedio1", "DatoAdicionalMedio2", "DatoAdicionalMedio3",	"DatoAdicionalMedio4", "DatoAdicionalMedio5", "DatoAdicionalMedio6", "DatoAdicionalMedio7", "DatoAdicionalMedio8", "DatoAdicionalMedio9"};
+	char * DatoBusquedaMedio[] = {"DatoBusquedaMedio1", "DatoBusquedaMedio2", "DatoBusquedaMedio3",	"DatoBusquedaMedio4", "DatoBusquedaMedio5", "DatoBusquedaMedio6", "DatoBusquedaMedio7", "DatoBusquedaMedio8", "DatoBusquedaMedio9"};
+	char * VerificarRedEnTipoEvento[] = {"VerificarRedEnTipoEvento1", "VerificarRedEnTipoEvento2", "VerificarRedEnTipoEvento3",	"VerificarRedEnTipoEvento4", "VerificarRedEnTipoEvento5", "VerificarRedEnTipoEvento6", "VerificarRedEnTipoEvento7", "VerificarRedEnTipoEvento8", "VerificarRedEnTipoEvento9"};
+
+	for( h = 0; h < 9; h++ ) {
+		ATTR_Medio[h] = XMLString::transcode(Medio[h]);
+		ATTR_DatoAdicionalMedio[h] = XMLString::transcode(DatoAdicionalMedio[h]);
+		ATTR_DatoBusquedaMedio[h] = XMLString::transcode(DatoBusquedaMedio[h]);
+		ATTR_VerificarRedEnTipoEvento[h] = XMLString::transcode(VerificarRedEnTipoEvento[h]);
+	}
+    /*parser = new XercesDOMParser();
+    parser->setValidationScheme( XercesDOMParser::Val_Always );    // optional.
+    parser->setDoNamespaces( true );    // optional
+
+    errHandler = ( ErrorHandler * ) new HandlerBase();
+    parser->setErrorHandler( errHandler );
+
+// m_ConfigFileParser->setLoadExternalDTD( false );
+  try
+  {*/
+     parser->parse( xmlname.c_str() );
+	 sglog("Cargado de conftps.xml OK");
+     // no need to free this pointer - owned by the parent parser object
+     xmlDoc = parser->getDocument();
+     // Get the top-level element: NAme is "root". No attributes for "root"
+     DOMElement* elementRoot = xmlDoc->getDocumentElement();
+
+     if( !elementRoot ) throw(std::runtime_error( "empty XML document" ));
+     // Parse XML file for tags of interest: "SeteosTPS"
+     // Look one level nested within "root". (child of root)
+     DOMNodeList*      children = elementRoot->getChildNodes();
+     const  XMLSize_t nodeCount = children->getLength();
+    // For all nodes, children of "root" in the XML tree.
+     for( XMLSize_t xx = 0; xx < nodeCount; ++xx )
+     {
+        DOMNode* currentNode = children->item(xx);
+        if( currentNode->getNodeType() &&  // true is not NULL
+            currentNode->getNodeType() == DOMNode::ELEMENT_NODE ) // is element
+        {
+           // Found node which is an Element. Re-cast node as element
+          DOMElement* currentElement
+                       = dynamic_cast< xercesc::DOMElement* >( currentNode );
+		  if( XMLString::equals(currentElement->getTagName(), TAG_VersionXml))
+           {
+              // Already tested node as type element and of name "ApplicationSettings".
+              // Read attributes of element "ApplicationSettings".
+              const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_Version);
+              m_OptionA = XMLString::transcode(xmlch_OptionA);
+			  if( m_OptionA != NULL){
+				strncpy(cadena2, m_OptionA,sizeof(cadena2));
+				cadena2[sizeof(cadena2) - 1] = 0;
+			    auxconfig.versionxml= atoi(cadena2);
+			  }
+		  }
+			if( XMLString::equals(currentElement->getTagName(), TAG_SeteosTPS))
+           {
+              // Already tested node as type element and of name "ApplicationSettings".
+              // Read attributes of element "ApplicationSettings".
+              const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_TicketFacturaPermanente);
+              m_OptionA = XMLString::transcode(xmlch_OptionA);
+			  auxconfig.activarTFpermanente = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
+              const XMLCh* xmlch_OptionB = currentElement->getAttribute(ATTR_LecturaClienteBarra);
+              m_OptionB = XMLString::transcode(xmlch_OptionB);
+			  auxconfig.activarLecturaClienteBarra = (!strcmp( m_OptionB, "SI")) ? 1 : 0;
+			  const XMLCh* xmlch_OptionC = currentElement->getAttribute(TAG_PedirDatoAdicionalCierre);
+              m_OptionC = XMLString::transcode(xmlch_OptionC);
+			  auxconfig.PedirDatoAdicionalCierre = (!strcmp( m_OptionC, "SI")) ? 1 : 0;
+			  const XMLCh* xmlch_OptionD = currentElement->getAttribute(TAG_ControlarLimiteVenta);
+              m_OptionA = XMLString::transcode(xmlch_OptionD);
+			  auxconfig.ControlarLimiteVenta = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
+			  const XMLCh* xmlch_OptionE = currentElement->getAttribute(TAG_ControlarEnvases);
+              m_OptionA = XMLString::transcode(xmlch_OptionE);
+			  auxconfig.ControlarEnvases = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
+			  const XMLCh* xmlch_OptionF = currentElement->getAttribute(TAG_ValidarArticuloPesable);
+              m_OptionA = XMLString::transcode(xmlch_OptionF);
+			  auxconfig.ValidarArticuloPesable = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
+			  const XMLCh* xmlch_OptionG = currentElement->getAttribute(TAG_ControlarCtaCte);
+              m_OptionA = XMLString::transcode(xmlch_OptionG);
+			  auxconfig.ControlarCtaCte = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
+			  const XMLCh* xmlch_OptionH = currentElement->getAttribute(TAG_ModalidadOffline);
+              m_OptionA = XMLString::transcode(xmlch_OptionH);
+			  auxconfig.ModalidadOffline = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
+			  const XMLCh* xmlch_OptionI = currentElement->getAttribute(TAG_ModalidadInventario);
+              m_OptionA = XMLString::transcode(xmlch_OptionI);
+			  auxconfig.ModalidadInventario = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
+			  const XMLCh* xmlch_OptionJ = currentElement->getAttribute(TAG_ControlarRetiro);
+              m_OptionA = XMLString::transcode(xmlch_OptionJ);
+			  auxconfig.ControlarRetiro = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
+			  const XMLCh* xmlch_OptionK = currentElement->getAttribute(TAG_ComprobanteAnulado);
+              m_OptionA = XMLString::transcode(xmlch_OptionK);
+			  auxconfig.ComprobanteAnulado = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
+			  const XMLCh* xmlch_OptionL = currentElement->getAttribute(TAG_NotificacionesUbuntu);
+			  m_OptionA = XMLString::transcode(xmlch_OptionL);
+			  auxconfig.NotificacionesUbuntu = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
+			  const XMLCh* xmlch_OptionLL = currentElement->getAttribute(TAG_ControlarMediosDePago);
+              m_OptionA = XMLString::transcode(xmlch_OptionLL);
+			  auxconfig.ControlarMediosDePago = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
+			  const XMLCh* xmlch_OptionM = currentElement->getAttribute(TAG_ListaPrecioxCliente);
+              m_OptionA = XMLString::transcode(xmlch_OptionM);
+			  auxconfig.ListaPrecioxCliente = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
+  			  /*
+			  const XMLCh* xmlch_OptionN = currentElement->getAttribute(TAG_NoMultiplicarConDecimales);
+              m_OptionA = XMLString::transcode(xmlch_OptionN);
+			  auxconfig.NoMultiplicarConDecimales = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
+			  */
+			  const XMLCh* xmlch_OptionN = currentElement->getAttribute(TAG_SoloPesablesCondecimales);
+              m_OptionA = XMLString::transcode(xmlch_OptionN);
+			  auxconfig.SoloPesablesCondecimales = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
+			  const XMLCh* xmlch_OptionO = currentElement->getAttribute(TAG_Informes);
+              m_OptionA = XMLString::transcode(xmlch_OptionO);
+			  auxconfig.Informes = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
+			  const XMLCh* xmlch_OptionP = currentElement->getAttribute(TAG_LecturaUsuarioBarra);
+              m_OptionA = XMLString::transcode(xmlch_OptionP);
+			  auxconfig.LecturaUsuarioBarra = (!strcmp( m_OptionA, "SI")) ? 1 : 0;	
+			  const XMLCh* xmlch_OptionQ = currentElement->getAttribute(TAG_ListaPrecioPermanente);
+              m_OptionA = XMLString::transcode(xmlch_OptionQ);
+			  auxconfig.ListaPrecioPermanente = (!strcmp( m_OptionA, "SI")) ? 1 : 0;	
+
+			  const XMLCh* xmlch_OptionR = currentElement->getAttribute(TAG_AlicuotasEnArticulo);
+              m_OptionA = XMLString::transcode(xmlch_OptionR);
+			  auxconfig.AlicuotasEnArticulo = (!strcmp( m_OptionA, "SI")) ? 1 : 0;	
+
+			  xmlch_OptionR = currentElement->getAttribute(TAG_SupervisorNoMultiplicables);
+              m_OptionA = XMLString::transcode(xmlch_OptionR);
+			  auxconfig.SupervisorNoMultiplicables = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
+
+
+
+   //           break;  // Data found. No need to look at other elements in tree.
+		   }
+			if( XMLString::equals(currentElement->getTagName(), TAG_Funcionalidades))
+			{
+				 //veamos si tiene hijos
+					DOMNodeList*      childrenF = currentElement->getChildNodes();
+					const  XMLSize_t nodeCountF = childrenF->getLength();
+					for( XMLSize_t xx = 0; xx < nodeCountF; ++xx )
+					{
+						DOMNode* currentNodeF = childrenF->item(xx);
+						if( currentNodeF->getNodeType() &&  // true is not NULL
+								currentNodeF->getNodeType() == DOMNode::ELEMENT_NODE ) // is element
+						{
+							// Found node which is an Element. Re-cast node as element
+							DOMElement* currentElement
+											= dynamic_cast< xercesc::DOMElement* >( currentNodeF );
+
+							if( XMLString::equals(currentElement->getTagName(), TAG_TicketFacturaPermanente))
+							{
+								const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_NombreCliente);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									strncpy(auxconfig.NombreCliente,cadena2,17);
+								}
+
+								const XMLCh* xmlch_OptionB = currentElement->getAttribute(ATTR_DniCliente);
+								m_OptionB = XMLString::transcode(xmlch_OptionB);
+								 if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionB,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									strncpy(auxconfig.DniCliente,cadena2,15);
+								}
+							    const XMLCh* xmlch_OptionC = currentElement->getAttribute(ATTR_EncabezadoTF);
+								m_OptionC = XMLString::transcode(xmlch_OptionC);
+								if( m_OptionC != NULL){
+									strncpy(cadena2, m_OptionC,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.encabezadoTF= atoi(cadena2);
+								}
+			  				}
+							if( XMLString::equals(currentElement->getTagName(),TAG_LecturaClienteBarra))
+							{
+								const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_Prefijo_scanner_cliente);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+								 if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									strncpy(auxconfig.Prefijo_scanner_cliente,cadena2,sizeof(auxconfig.Prefijo_scanner_cliente));
+								}
+								const XMLCh* xmlch_OptionB = currentElement->getAttribute(ATTR_DetectarPrefijoCliente);
+								m_OptionA = XMLString::transcode(xmlch_OptionB);
+								 if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.DetectarPrefijoCliente = atoi(cadena2);
+								}
+							}
+							if( XMLString::equals(currentElement->getTagName(), TAG_PedirDatoAdicionalCierre))
+							{
+								const XMLCh* xmlch_OptionM[9];
+								const XMLCh* xmlch_OptionDAM[9];
+								const XMLCh* xmlch_OptionDBM[9];
+								int h = 0;
+								
+								for( h = 0; h < 9; h++ ) {
+									xmlch_OptionM[h] = currentElement->getAttribute(ATTR_Medio[h]);
+									m_OptionA1[h] = XMLString::transcode(xmlch_OptionM[h]);
+									memset(cadena2,0, sizeof(cadena2));
+									if( m_OptionA1[h]!= NULL){
+										strncpy(cadena2, m_OptionA1[h],sizeof(cadena2));
+										cadena2[sizeof(cadena2) - 1] = 0;
+										auxconfig.CierreMedio[h]= atoi(cadena2);
+									} else {
+										auxconfig.CierreMedio[h] = 0;
+										auxconfig.DatoAdicionalMedio[h] = 0;
+										strncpy(auxconfig.DatoAdiBusquedaMedio[h],cadena2, sizeof( auxconfig.DatoAdiBusquedaMedio[h]) - 1);
+									}
+								}
+
+								for( h = 0; h < 9; h++ ) {
+									xmlch_OptionDAM[h] = currentElement->getAttribute(ATTR_DatoAdicionalMedio[h]);
+									m_OptionA2[h] = XMLString::transcode(xmlch_OptionDAM[h]);
+									memset(cadena2,0, sizeof(cadena2));
+									if( auxconfig.CierreMedio[h] && m_OptionA2[h] != NULL){
+										strncpy(cadena2, m_OptionA2[h],sizeof(cadena2));
+										cadena2[sizeof(cadena2) - 1] = 0;
+										auxconfig.DatoAdicionalMedio[h]= atoi(cadena2);
+									} else {
+										auxconfig.CierreMedio[h] = 0;
+										auxconfig.DatoAdicionalMedio[h] = 0;
+										strncpy(auxconfig.DatoAdiBusquedaMedio[h],cadena2, sizeof( auxconfig.DatoAdiBusquedaMedio[h]) - 1);
+									}
+								}
+
+								for( h = 0; h < 9; h++ ) {
+									xmlch_OptionDBM[h] = currentElement->getAttribute(ATTR_DatoBusquedaMedio[h]);
+									m_OptionA3[h] = XMLString::transcode(xmlch_OptionDBM[h]);
+									memset(cadena2,0, sizeof(cadena2));
+									if( auxconfig.DatoAdicionalMedio[h] && m_OptionA3[h] != NULL){
+										strncpy(cadena2, m_OptionA3[h],sizeof(cadena2));
+										cadena2[sizeof(cadena2) - 1] = 0;
+										strncpy(auxconfig.DatoAdiBusquedaMedio[h],cadena2, sizeof( auxconfig.DatoAdiBusquedaMedio[h]) - 1);
+									} else {
+										auxconfig.CierreMedio[h] = 0;
+										auxconfig.DatoAdicionalMedio[h] = 0;
+										strncpy(auxconfig.DatoAdiBusquedaMedio[h],cadena2, sizeof( auxconfig.DatoAdiBusquedaMedio[h]) - 1);
+									}
+								}
+			  				}
+							if( XMLString::equals(currentElement->getTagName(),TAG_ControlarLimiteVenta))
+							{
+								const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_BloquearAlSuperaLimiteVenta);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+								 if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.BloquearAlSuperaLimiteVenta = atoi(cadena2);
+								}
+								const XMLCh* xmlch_OptionB = currentElement->getAttribute(ATTR_MsjTecla_BloquearAlSuperaLimiteVenta);
+								m_OptionA = XMLString::transcode(xmlch_OptionB);
+								if( m_OptionA != NULL){
+									memset(msj,0, sizeof(msj));
+									strncpy(msj, m_OptionA,sizeof(msj));
+									msj[sizeof(msj) - 1] = 0;
+									strncpy(auxconfig.MsjTecla_BloquearAlSuperaLimiteVenta,msj,100);
+								}
+								const XMLCh* xmlch_OptionC = currentElement->getAttribute(ATTR_PermitirNCsuperadoLimiteVenta);
+								m_OptionA = XMLString::transcode(xmlch_OptionC);
+								 if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.PermitirNCsuperadoLimiteVenta = atoi(cadena2);
+								}
+
+							}
+							if( XMLString::equals(currentElement->getTagName(), TAG_ControlarEnvases))
+							{
+ 							    const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_ControlarDevolucionEnvases);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.ControlarDevolucionEnvases = atof(cadena2);
+								}
+								const XMLCh* xmlch_OptionB = currentElement->getAttribute(ATTR_MsjTecla_i_EnvasesSinDevolver);
+								m_OptionA = XMLString::transcode(xmlch_OptionB);
+								 if( m_OptionA != NULL){
+									memset(msj,0, sizeof(msj));
+									strncpy(msj, m_OptionA,sizeof(msj));
+									msj[sizeof(msj) - 1] = 0;
+									strncpy(auxconfig.MsjTecla_i_EnvasesSinDevolver, msj,sizeof(auxconfig.MsjTecla_i_EnvasesSinDevolver));
+								}
+								const XMLCh* xmlch_OptionC = currentElement->getAttribute(ATTR_AutorizarEnvases);
+								m_OptionA= XMLString::transcode(xmlch_OptionC);
+								 if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.AutorizarEnvases= atoi(cadena2);
+								}							 
+								const XMLCh* xmlch_OptionD = currentElement->getAttribute(ATTR_MsjTecla_AutorizarEnvases);
+								m_OptionA = XMLString::transcode(xmlch_OptionD);
+								if( m_OptionA != NULL){
+									memset(msj,0, sizeof(msj));
+									strncpy(msj, m_OptionA,sizeof(msj));
+									msj[sizeof(msj) - 1] = 0;
+									strncpy(auxconfig.MsjTecla_AutorizarEnvases,msj,100);
+								}
+							}
+							if( XMLString::equals(currentElement->getTagName(), TAG_ValidarArticuloPesable))
+							{
+ 							    const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_PedirSuperMenorMinimoPeso);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.PedirSuperMenorMinimoPeso = atof(cadena2);
+								}
+								const XMLCh* xmlch_OptionB = currentElement->getAttribute(ATTR_PedirSuperMenorMinimoImporte);
+								m_OptionA = XMLString::transcode(xmlch_OptionB);
+								 if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.PedirSuperMenorMinimoImporte = atof(cadena2);
+								}
+								const XMLCh* xmlch_OptionC = currentElement->getAttribute(ATTR_PedirSuperIngresoPesoManual);
+								m_OptionA= XMLString::transcode(xmlch_OptionC);
+								 if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.PedirSuperIngresoPesoManual = atoi(cadena2);
+								}
+
+			  				}
+							if( XMLString::equals(currentElement->getTagName(), TAG_ControlarCtaCte))
+							{
+ 							    const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_ClienteCtaCtePagos);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.ClienteCtaCtePagos= atoi(cadena2);
+								}
+			  				}
+							if( XMLString::equals(currentElement->getTagName(), TAG_ModalidadOffline))
+							{
+ 							    const XMLCh* xmlch_OptionVRTE[9];
+								const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_VerificarRedCadaXEventos);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.VerificarRedCadaXEventos = atoi(cadena2);
+								}
+								for( h = 0; h < 9; h++ ) {
+									xmlch_OptionVRTE[h] = currentElement->getAttribute(ATTR_VerificarRedEnTipoEvento[h]);
+									m_OptionA2[h] = XMLString::transcode(xmlch_OptionVRTE[h]);
+									memset(cadena2,0, sizeof(cadena2));
+									strncpy(cadena2, m_OptionA2[h],sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									if( strlen(cadena2) ) {
+										auxconfig.VerificarRedEnTipoEvento[h]= atoi(cadena2);
+									} else {
+										auxconfig.VerificarRedEnTipoEvento[h]= -1;
+									}
+								}
+			  				}
+							if( XMLString::equals(currentElement->getTagName(), TAG_ModalidadInventario))
+							{
+ 							    const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_ImprimirInventarioReducido);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.ImprimirInventarioReducido= atoi(cadena2);
+								}
+								const XMLCh* xmlch_OptionB = currentElement->getAttribute(ATTR_CodigoValidacionInventario);
+								m_OptionA= XMLString::transcode(xmlch_OptionB);
+								 if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.CodigoValidacionInventario = atoi(cadena2);
+								}
+			  				}
+							if( XMLString::equals(currentElement->getTagName(), TAG_ControlarRetiro))
+							{
+ 							    const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_PedirConfirmacionRetiroExcedido);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.PedirConfirmacionRetiroExcedido = atoi(cadena2);
+								}
+			  				}
+							if( XMLString::equals(currentElement->getTagName(), TAG_ComprobanteAnulado))
+							{
+ 							    const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_ImprimirComprobanteAnulado);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.ImprimirComprobanteAnulado = atoi(cadena2);
+								}
+								const XMLCh* xmlch_OptionB = currentElement->getAttribute(ATTR_VoucherComprobanteAnulado);
+								m_OptionA = XMLString::transcode(xmlch_OptionB);
+								 if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.VoucherComprobanteAnulado = atoi(cadena2);
+								}
+			  				}
+							if( XMLString::equals(currentElement->getTagName(), TAG_ControlarMediosDePago))
+							{
+ 							    const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_AgruparMediosEnImpresion);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.AgruparMediosEnImpresion = atoi(cadena2);
+								}
+								const XMLCh* xmlch_OptionB = currentElement->getAttribute(ATTR_CantMediosPermitidos);
+								m_OptionA = XMLString::transcode(xmlch_OptionB);
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.CantMediosPermitidos = atoi(cadena2);
+								}
+								const XMLCh* xmlch_OptionC = currentElement->getAttribute(ATTR_InformarMediosExcedidos);
+								m_OptionA = XMLString::transcode(xmlch_OptionC);
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.InformarMediosExcedidos = atoi(cadena2);
+								}
+			  				}
+							if( XMLString::equals(currentElement->getTagName(), TAG_ListaPrecioxCliente))
+							{
+							//las autorizaciones son 0 no autorizar, 1 supervisor, 2 gerente
+								char *ptr;
+								const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_PedirAutorizacionTecla);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.PedirAutorizacionTecla = atoi(cadena2);
+								}
+								const XMLCh* xmlch_OptionB = currentElement->getAttribute(ATTR_PedirAutorizacionCliente);
+								m_OptionA = XMLString::transcode(xmlch_OptionB);
+
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.PedirAutorizacionCliente = atoi(cadena2);
+								}
+
+								const XMLCh* xmlch_OptionC = currentElement->getAttribute(ATTR_ListasAutorizacion);
+								m_OptionA = XMLString::transcode(xmlch_OptionC);
+								//aca la lista viene separadas por ; asi que hay que parsear
+								if( m_OptionA != NULL){
+									ptr = strtok(m_OptionA ,";");
+									int ii =0;
+									while(ptr != NULL)
+									{
+										strncpy(cadena2, ptr,2);
+										cadena2[sizeof(cadena2) - 1] = 0;
+										auxconfig.ListasAutorizacion[ii] = atoi(cadena2);
+										ii++;
+										ptr = strtok(NULL, " ");
+									}
+
+								}
+							}
+							/*
+							if( XMLString::equals(currentElement->getTagName(), TAG_NoMultiplicarConDecimales))
+							{
+								char *token;
+								char seps[] = ",";
+								char *str;
+								int i = 0;//UnidadesNOpermitidas[20][6]
+								const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_UnidadesNOpermitidas);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+								memset(cadena2,0, sizeof(cadena2));
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									str = (char*)malloc(strlen(cadena2)+1);
+									strncpy(str,cadena2,strlen(cadena2)+1);
+									token = strtok( str, seps );
+									while( ( token != NULL ) && ( i < 20 ) )
+									{
+										//While there are tokens in "string"
+										memset(auxconfig.UnidadesNOpermitidas[i],0, sizeof(auxconfig.UnidadesNOpermitidas[i]));
+										strncpy(auxconfig.UnidadesNOpermitidas[i],token, sizeof(auxconfig.UnidadesNOpermitidas[i]));
+										//Get next token: 
+										token = strtok( NULL, seps );
+										i++;
+									}
+									if(str)
+										free (str);
+								}
+							}//Fin NoMultilicarConDecimales
+							*/
+							if( XMLString::equals(currentElement->getTagName(), TAG_Informes))
+							{
+ 							    const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_ImprimirInformeYenZ);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.ImprimirInformeYenZ = atoi(cadena2);
+								}
+			  				}
+							if( XMLString::equals(currentElement->getTagName(),TAG_LecturaUsuarioBarra))
+							{
+								const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_PrefijoScannerSupervisor);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+								 if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									strncpy(auxconfig.PrefijoScannerSupervisor,cadena2,sizeof(auxconfig.PrefijoScannerSupervisor));
+								}
+								const XMLCh* xmlch_OptionB = currentElement->getAttribute(ATTR_DetectarPrefijoSupervisor);
+								m_OptionA = XMLString::transcode(xmlch_OptionB);
+								 if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.DetectarPrefijoSupervisor = atoi(cadena2);
+								}
+							}
+							if( XMLString::equals(currentElement->getTagName(), TAG_ListaPrecioPermanente)){
+								const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_CodigoListaPrecio);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.CodigoListaPrecio= atoi(cadena2);
+								}												
+							}//FIN TAG_ListaPrecioPermanente
+							if( XMLString::equals(currentElement->getTagName(), TAG_AlicuotasEnArticulo)){
+								const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_ModificarAlicuotaDeArticuloConsFinal);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.ModificarAlicuotaDeArticuloConsFinal= atoi(cadena2);
+								}												
+							}//FIN TAG_AlicuotasEnArticulo
+						}//fin IF
+					}//fin FOR
+			}//fin IF - TAG_Funcionalidades
+		} else {//veamos si es la version
+
+		}
+	}
+}
+
+DOMNodeList * CCtaCte::GetNodeByTagName( string name )
+{
+    return document->getElementsByTagName( ( const XMLCh * )toXMLCh( name ) );
+}
+/*
+tagname = es el tag , ejemplo estado
+name= es el valor a buscar, ejemplo PEGASUS
+campo1= es el nombre del campo donde tengo que buscar, id
+buscar= es la cadena con el valor a cumpir, ventas
+campo2= es el nombre del campo donde tengo que buscar la condicion, name
+Entonces si busco el valor de Pegasus en el campo id, para el caso de que el campo name sea ventas
+estado, Pegasus, 0, ventas
+*/                                                 
+//                                       estado       Pegasus        id            name         ventas
+int  CCtaCte::GetChildsByTagName( string tagname, string name, string campo1 ,string buscar, string campo2 )
+/* si el parametros 2 viene en null quiere decir que busca el valor de campo1 que cumpla con la condicion
+de buscar = campo2
+*/
+{
+    bool encontrecriterio = false;
+	bool encontrevalor = false;
+	DOMNode *subnodes;
+	
+	DOMNodeList *nodes = GetNodeByTagName( tagname );
+
+
+
+    for( int i = 0;i< (int)nodes->getLength();i++ ) { //en nodes hay cantidad 3 porque 3 son los estado
+        subnodes = nodes->item( i );
+		DOMNamedNodeMap *attr = subnodes->getAttributes(); //todos los datos del estado 
+		encontrecriterio = false;
+		encontrevalor = false;
+	
+		
+//		for( int j = 0;j< (int)attr->getLength()&& (encontrecriterio == false ||  encontrevalor == false) ;j++ ) { //
+		for( int j = (int)attr->getLength() -1 ; j >= 0 && (encontrecriterio == false ||  encontrevalor == false) ;j-- ) { //
+			XMLCh *name1 = ( XMLCh * )( attr->item(j /*0*/ ) )->getNodeValue(); //0 Apegasus / 1ventas
+			XMLCh *id1 = ( XMLCh * )( attr->item(j /*0*/ ) )->getNodeName(); // 0 id  /1name
+			//veamos si se cumple la condicion que sea el valor ventas en el campo name
+			if(( name.compare("-1") != 0) &&  !toString( id1).compare( buscar ) && !toString(name1).compare( campo2  ) ) {
+				encontrecriterio = true;
+			}
+			if(( name.compare("-1") != 0) && !toString( name1).compare( name ) && !toString( id1).compare( campo1 ) ) {
+				encontrevalor = true;
+			}
+		}
+
+		if( encontrecriterio == true && encontrevalor == true ) {
+			return 1;
+		}
+	}
+    return 0;
+}
+
+int CCtaCte::GetChildsByTagName2( string tagname, string * name, string campo1 ,string buscar, string campo2 )
+{
+    bool encontrecriterio = false;
+	bool encontrevalor = false;
+	DOMNode *subnodes;
+	char cadena[50];
+
+	memset(cadena, 0,sizeof(cadena));
+	
+	DOMNodeList *nodes = GetNodeByTagName( tagname );
+
+
+
+    for( int i = 0;i< (int)nodes->getLength();i++ ) { //en nodes hay cantidad 3 porque 3 son los estado
+        subnodes = nodes->item( i );
+		DOMNamedNodeMap *attr = subnodes->getAttributes(); //todos los datos del estado 
+		encontrecriterio = false;
+		encontrevalor = false;
+	
+		for( int j = (int)attr->getLength() -1 ; j >= 0 && (encontrecriterio == false ||  encontrevalor == false) ;j-- ) { //
+			XMLCh *name1 = ( XMLCh * )( attr->item(j /*0*/ ) )->getNodeValue(); //0 Apegasus / 1ventas
+			XMLCh *id1 = ( XMLCh * )( attr->item(j /*0*/ ) )->getNodeName(); // 0 id  /1name
+			//veamos si se cumple la condicion que sea el valor ventas en el campo name
+			if( !toString( name1).compare( campo2 )){
+					encontrecriterio = true;
+				//name.assign(toString(name1));
+			}
+			if( encontrecriterio == true && !toString( id1).compare( campo1 )){
+				encontrevalor = true;
+				name->assign(toString( name1));
+
+			}
+		}
+
+		if( encontrecriterio == true && encontrevalor == true ) {
+//			name.assign(toString(name1));
+//			SET_VALORES_EXTRAS(toString(name1));
+			return 1;
+		}
+	}
+    return 0;
+}
+
+
+CCtaCte::~CCtaCte()
+{
+/*    delete windows;
+    delete text;
+    delete repository;
+    delete forms;
+    delete images;*/
+    delete parser;
+
+    XMLPlatformUtils::Terminate();
+}
+
+CCtaCte::CCtaCte( string xmlname )
+{
+    int list1;
+	int campos[5];
+	int ventas=0,pagos=0,cobros=0;
+	char cadena[50],cadena2[50];
+	memset(cadena,0, sizeof(cadena));
+	memset(cadena2,0, sizeof(cadena2));
+	string name;
+
+	try {
+        XMLPlatformUtils::Initialize();
+    }
+    catch( const XMLException &toCatch ) {
+        char *message = XMLString::transcode( toCatch.getMessage() );
+        cout << "Error during initialization! :\n" << message << "\n";
+        XMLString::release( &message );
+        error = INITIALIZE_ERR;
+        return;
+    }
+
+    parser = new XercesDOMParser();
+    parser->setValidationScheme( XercesDOMParser::Val_Always );    // optional.
+    parser->setDoNamespaces( true );    // optional
+
+    errHandler = ( ErrorHandler * ) new HandlerBase();
+    parser->setErrorHandler( errHandler );
+
+    try {
+        parser->parse( xmlname.c_str() );
+    }
+    catch( const XMLException &toCatch ) {
+        char *message = XMLString::transcode( toCatch.getMessage() );
+        cout << "Exception message is: \n" << message << "\n";
+        XMLString::release( &message );
+        error = PARSE_ERR;
+        return;
+    }
+    catch( const DOMException &toCatch ) {
+        char *message = XMLString::transcode( toCatch.msg );
+        cout << "Exception message is: \n" << message << "\n";
+        XMLString::release( &message );
+        error = DOM_ERR;
+        return;
+    }
+    catch( ... ) {
+        cout << "Unexpected Exception \n" ;
+        error = UNKNOWN_ERR;
+        return;
+    }
+    document = parser->getDocument();
+	
+//produce exepcion 005 ta bueno para probar	list1 = GetChildsByTagName("lugares", "estado");
+	//<estado name="ventas" id= "Apegasus"/>
+	list1 = GetChildsByTagName("estado", "Pegasus","id", "name", "ventas"); //0 devueld el contenido de id, 1 devuelve el contenido de name
+	if( list1 != NULL){ 
+		ventas =1;
+	}
+	list1 = GetChildsByTagName("estado", "Pegasus","id", "name", "pagos"); //0 devueld el contenido de id, 1 devuelve el contenido de name
+	if( list1 != NULL){ 
+		pagos =1;
+	}
+	list1 = GetChildsByTagName("estado", "Pegasus","id", "name", "cobros"); //0 devueld el contenido de id, 1 devuelve el contenido de name
+	if( list1 != NULL){ 
+		cobros =1;
+	}
+	//aca carguemos el nombre del sp
+	name.assign("-1");
+	list1 = GetChildsByTagName2("estado", &name/*"-1"*/,"id", "name", "sp_invel"); //0 devueld el contenido de id, 1 devuelve el contenido de name
+	if( list1 != NULL){ 
+		strncpy(cadena, name.c_str(),50);
+		cadena[sizeof(cadena) - 1] = 0;
+	} else{
+		strncpy(cadena, "PG_SP_CUENTAS_CORRIENTES",50); //por defecto
+		cadena[sizeof(cadena) - 1] = 0;
+	}
+	name.assign("-1");
+	list1 = GetChildsByTagName2("estado", &name/*"-1"*/,"id", "name", "tabla_ctacte"); //0 devueld el contenido de id, 1 devuelve el contenido de name
+	if( list1 != NULL){ 
+		strncpy(cadena2, name.c_str(),50);
+		cadena2[sizeof(cadena2) - 1] = 0;
+	} else{
+		strncpy(cadena2, "PG_CUENTAS_CORRIENTES",50); //por defecto
+		cadena2[sizeof(cadena2) - 1] = 0;
+	}
+	name.assign("-1");
+	list1 = GetChildsByTagName2("estado", &name/*"-1"*/,"id", "name", "iError"); 
+	if( list1 != NULL){ 
+		campos[0]= atoi( name.c_str() );
+	} else{
+		campos[0]= 1;
+	}
+	name.assign("-1");
+	list1 = GetChildsByTagName2("estado", &name/*"-1"*/,"id", "name", "cError"); 
+	if( list1 != NULL){ 
+		campos[1]= atoi( name.c_str() );
+	} else{
+		campos[1]= 2;
+	}
+	name.assign("-1");
+	list1 = GetChildsByTagName2("estado", &name/*"-1"*/,"id", "name", "cBigError"); 
+	if( list1 != NULL){ 
+		campos[2]= atoi( name.c_str() );
+	} else{
+		campos[2]= 3;
+	}
+	name.assign("-1");
+	list1 = GetChildsByTagName2("estado", &name/*"-1"*/,"id", "name", "fSaldoDisponible"); 
+	if( list1 != NULL){ 
+		campos[3]= atoi( name.c_str() );
+	} else{
+		campos[3]= 8;
+	}
+	name.assign("-1");
+	list1 = GetChildsByTagName2("estado", &name/*"-1"*/,"id", "name", "fDeudaActual"); 
+	if( list1 != NULL){ 
+		campos[4]= atoi( name.c_str() );
+	} else{
+		campos[4]= 12;
+	}
+	
+
+	
+	SET_VALORES_CTACTE(ventas,pagos,cobros,cadena, cadena2, campos);
+	
+}
+DOMNodeList * CPromoMayorista::GetNodeByTagName( string name )
+{
+    return document->getElementsByTagName( ( const XMLCh * )toXMLCh( name ) );
+}
+
+int  CPromoMayorista::GetChildsByTagName( string tagname, string name, string campo1 ,string buscar, string campo2 )
+/* si el parametros 2 viene en null quiere decir que busca el valor de campo1 que cumpla con la condicion
+de buscar = campo2
+*/
+{
+    bool encontrecriterio = false;
+	bool encontrevalor = false;
+	DOMNode *subnodes;
+	
+	DOMNodeList *nodes = GetNodeByTagName( tagname );
+
+
+
+    for( int i = 0;i< (int)nodes->getLength();i++ ) { //en nodes hay cantidad 3 porque 3 son los estado
+        subnodes = nodes->item( i );
+		DOMNamedNodeMap *attr = subnodes->getAttributes(); //todos los datos del estado 
+		encontrecriterio = false;
+		encontrevalor = false;
+	
+		
+//		for( int j = 0;j< (int)attr->getLength()&& (encontrecriterio == false ||  encontrevalor == false) ;j++ ) { //
+		for( int j = (int)attr->getLength() -1 ; j >= 0 && (encontrecriterio == false ||  encontrevalor == false) ;j-- ) { //
+			XMLCh *name1 = ( XMLCh * )( attr->item(j /*0*/ ) )->getNodeValue(); //0 Apegasus / 1ventas
+			XMLCh *id1 = ( XMLCh * )( attr->item(j /*0*/ ) )->getNodeName(); // 0 id  /1name
+			//veamos si se cumple la condicion que sea el valor ventas en el campo name
+			if(( name.compare("-1") != 0) &&  !toString( id1).compare( buscar ) && !toString(name1).compare( campo2  ) ) {
+				encontrecriterio = true;
+			}
+			if(( name.compare("-1") != 0) && !toString( name1).compare( name ) && !toString( id1).compare( campo1 ) ) {
+				encontrevalor = true;
+			}
+		}
+
+		if( encontrecriterio == true && encontrevalor == true ) {
+			return 1;
+		}
+	}
+    return 0;
+}
+
+int CPromoMayorista::GetChildsByTagName2( string tagname, string * name, string campo1 ,string buscar, string campo2 )
+{
+    bool encontrecriterio = false;
+	bool encontrevalor = false;
+	DOMNode *subnodes;
+	char cadena[50];
+
+	memset(cadena, 0,sizeof(cadena));
+	
+	DOMNodeList *nodes = GetNodeByTagName( tagname );
+
+
+
+    for( int i = 0;i< (int)nodes->getLength();i++ ) { //en nodes hay cantidad 3 porque 3 son los estado
+        subnodes = nodes->item( i );
+		DOMNamedNodeMap *attr = subnodes->getAttributes(); //todos los datos del estado 
+		encontrecriterio = false;
+		encontrevalor = false;
+	
+		for( int j = (int)attr->getLength() -1 ; j >= 0 && (encontrecriterio == false ||  encontrevalor == false) ;j-- ) { //
+			XMLCh *name1 = ( XMLCh * )( attr->item(j /*0*/ ) )->getNodeValue(); //0 Apegasus / 1ventas
+			XMLCh *id1 = ( XMLCh * )( attr->item(j /*0*/ ) )->getNodeName(); // 0 id  /1name
+			//veamos si se cumple la condicion que sea el valor ventas en el campo name
+			if( !toString( name1).compare( campo2 )){
+					encontrecriterio = true;
+				//name.assign(toString(name1));
+			}
+			if( encontrecriterio == true && !toString( id1).compare( campo1 )){
+				encontrevalor = true;
+				name->assign(toString( name1));
+
+			}
+		}
+
+		if( encontrecriterio == true && encontrevalor == true ) {
+//			name.assign(toString(name1));
+//			SET_VALORES_EXTRAS(toString(name1));
+			return 1;
+		}
+	}
+    return 0;
+}
+
+
+CPromoMayorista::~CPromoMayorista()
+{
+/*    delete windows;
+    delete text;
+    delete repository;
+    delete forms;
+    delete images;*/
+    delete parser;
+
+    XMLPlatformUtils::Terminate();
+}
+
+CPromoMayorista::CPromoMayorista( string xmlname )
+{
+    int list1;
+	int activa=0, lista=0, controlacliente=0;
+	long articulo_descarga_long =0;
+	char articulo_descarga_barra[17];
+	long art_descarga_long_defecto =0;
+	char art_descarga_barra_defecto[17];
+	char art_descarga_desc_defecto[31];
+	char cadena[50],cadena2[50], cadena3[100];
+	char msj_tecla13_promo_inmediata[100];
+	int promo_inmediata = 0;
+	int promo_detallada = 0;
+
+	memset(cadena,0, sizeof(cadena));
+	memset(cadena2,0, sizeof(cadena2));
+	memset(cadena3,0, sizeof(cadena3));
+	memset(msj_tecla13_promo_inmediata,0, sizeof(msj_tecla13_promo_inmediata));
+	memset(articulo_descarga_barra,0, sizeof(articulo_descarga_barra));
+    memset(art_descarga_barra_defecto,0, sizeof(art_descarga_barra_defecto));
+    memset(art_descarga_desc_defecto,0, sizeof(art_descarga_desc_defecto));
+	
+	string name;
+
+	try {
+        XMLPlatformUtils::Initialize();
+    }
+    catch( const XMLException &toCatch ) {
+        char *message = XMLString::transcode( toCatch.getMessage() );
+        cout << "Error during initialization! :\n" << message << "\n";
+        XMLString::release( &message );
+        error = INITIALIZE_ERR;
+        return;
+    }
+
+    parser = new XercesDOMParser();
+    parser->setValidationScheme( XercesDOMParser::Val_Always );    // optional.
+    parser->setDoNamespaces( true );    // optional
+
+    errHandler = ( ErrorHandler * ) new HandlerBase();
+    parser->setErrorHandler( errHandler );
+
+    try {
+        parser->parse( xmlname.c_str() );
+    }
+    catch( const XMLException &toCatch ) {
+        char *message = XMLString::transcode( toCatch.getMessage() );
+        cout << "Exception message is: \n" << message << "\n";
+        XMLString::release( &message );
+        error = PARSE_ERR;
+        return;
+    }
+    catch( const DOMException &toCatch ) {
+        char *message = XMLString::transcode( toCatch.msg );
+        cout << "Exception message is: \n" << message << "\n";
+        XMLString::release( &message );
+        error = DOM_ERR;
+        return;
+    }
+    catch( ... ) {
+        cout << "Unexpected Exception \n" ;
+        error = UNKNOWN_ERR;
+        return;
+    }
+    document = parser->getDocument();
+	name.assign("-1");
+	list1 = GetChildsByTagName2("estado", &name,"id", "name", "articulo_descarga_long"); //0 devueld el contenido de id, 1 devuelve el contenido de name
+	if( list1 != NULL){ 
+		strncpy(cadena, name.c_str(),50);
+		cadena[sizeof(cadena) - 1] = 0;
+		articulo_descarga_long= atol(cadena);
+	} else{
+		glog("ARTICULO DESCARGA MAYORISTA FALTANTE",LOG_INCONDICIONAL,1);
+	}
+	name.assign("-1");
+	list1 = GetChildsByTagName2("estado", &name,"id", "name", "articulo_descarga_barra"); //0 devueld el contenido de id, 1 devuelve el contenido de name
+	if( list1 != NULL){ 
+		strncpy(cadena2, name.c_str(),50);
+		cadena2[sizeof(cadena2) - 1] = 0;
+		strncpy(articulo_descarga_barra,cadena2,17);
+	} else{
+		glog("ARTICULO DESCARGA MAYORISTA FALTANTE",LOG_INCONDICIONAL,1);
+	}	
+	name.assign("-1");
+	list1 = GetChildsByTagName2("estado", &name,"id", "name", "art_descarga_long_defecto"); //0 devueld el contenido de id, 1 devuelve el contenido de name
+	if( list1 != NULL){ 
+		strncpy(cadena, name.c_str(),50);
+		cadena[sizeof(cadena) - 1] = 0;
+		art_descarga_long_defecto = atol(cadena);
+	} else{
+		glog("ARTICULO COD_INTERNO DESCARGA POR DEFECTO MAYORISTA FALTANTE",LOG_INCONDICIONAL,1);
+	}
+	name.assign("-1");
+	list1 = GetChildsByTagName2("estado", &name,"id", "name", "art_descarga_barra_defecto"); //0 devueld el contenido de id, 1 devuelve el contenido de name
+	if( list1 != NULL){ 
+		strncpy(cadena2, name.c_str(),50);
+		cadena2[sizeof(cadena2) - 1] = 0;
+		strncpy(art_descarga_barra_defecto,cadena2,17);
+	} else{
+		glog("ARTICULO BARRA DESCARGA POR DEFECTO MAYORISTA FALTANTE",LOG_INCONDICIONAL,1);
+	}
+	name.assign("-1");
+	list1 = GetChildsByTagName2("estado", &name,"id", "name", "art_descarga_desc_defecto"); //0 devueld el contenido de id, 1 devuelve el contenido de name
+	if( list1 != NULL){ 
+		strncpy(cadena2, name.c_str(),50);
+		cadena2[sizeof(cadena2) - 1] = 0;
+		strncpy(art_descarga_desc_defecto,cadena2,30);
+	} else{
+		glog("ARTICULO DESCRIPCION DESCARGA POR DEFECTO MAYORISTA FALTANTE",LOG_INCONDICIONAL,1);
+	}
+	name.assign("-1");
+	list1 = GetChildsByTagName2("estado", &name,"id", "name", "activa"); //0 devueld el contenido de id, 1 devuelve el contenido de name
+	if( list1 != NULL){ 
+		strncpy(cadena2, name.c_str(),50);
+		cadena2[sizeof(cadena2) - 1] = 0;
+		activa = atoi(cadena2);
+	} else{
+		glog("PROMO MAY. DESACTIVADA",LOG_INCONDICIONAL,1);
+		activa = 0;
+	}
+	//
+	list1 = GetChildsByTagName2("estado", &name,"id", "name", "cod_lista"); //0 devueld el contenido de id, 1 devuelve el contenido de name
+	if( list1 != NULL){ 
+		strncpy(cadena2, name.c_str(),50);
+		cadena2[sizeof(cadena2) - 1] = 0;
+		lista= atoi(cadena2);
+	} else{
+		glog("PROMO LISTA PRECIO NO CONFIGURADA",LOG_INCONDICIONAL,1);
+		lista = 0;
+	}
+	list1 = GetChildsByTagName2("estado", &name,"id", "name", "controlacliente"); //0 devueld el contenido de id, 1 devuelve el contenido de name
+	if( list1 != NULL){ 
+		strncpy(cadena2, name.c_str(),50);
+		cadena2[sizeof(cadena2) - 1] = 0;
+		_strupr(cadena2);//conviertir a mayuscula
+		controlacliente = (!strcmp( cadena2, "SI")) ? 1 : 0;
+	} else{
+		glog("PROMO LISTA PRECIO NO CONTROLA CLIENTE",LOG_INCONDICIONAL,1);
+		controlacliente = 0;
+	}
+	list1 = GetChildsByTagName2("estado", &name,"id", "name", "promo_inmediata"); //0 devueld el contenido de id, 1 devuelve el contenido de name
+	if( list1 != NULL){ 
+		strncpy(cadena2, name.c_str(),50);
+		cadena2[sizeof(cadena2) - 1] = 0;
+		_strupr(cadena2);//conviertir a mayuscula
+		promo_inmediata = (!strcmp( cadena2, "SI")) ? 1 : 0;
+	} else{
+		glog("PROMO LISTA PRECIO NO ES INMEDIATA",LOG_INCONDICIONAL,1);
+		promo_inmediata = 0;
+	}
+	name.assign("-1");
+	list1 = GetChildsByTagName2("estado", &name,"id", "name", "msj_tecla13_promo_inmediata");
+	if( list1 != NULL){ 
+		strncpy( cadena3, name.c_str(),100);
+		cadena3[sizeof(cadena3) - 1] = 0;
+		strncpy(msj_tecla13_promo_inmediata,cadena3,100);
+	} else{
+		glog("NO EXISTE MSJ PROMO INMEDIATA",LOG_INCONDICIONAL,1);
+	}
+
+	list1 = GetChildsByTagName2("estado", &name,"id", "name", "promo_detallada"); //0 devueld el contenido de id, 1 devuelve el contenido de name
+	if( list1 != NULL){ 
+		strncpy(cadena2, name.c_str(),50);
+		cadena2[sizeof(cadena2) - 1] = 0;
+		_strupr(cadena2);//conviertir a mayuscula
+		promo_detallada = (!strcmp( cadena2, "SI")) ? 1 : 0;
+	} else{
+		glog("PROMO LISTA PRECIO DETALLADA NO ESTA",LOG_INCONDICIONAL,1);
+		promo_detallada = 0;
+	}
+
+	//aca vemos de cargar la promo 
+	SET_VALORES_PROMO(articulo_descarga_long, articulo_descarga_barra,activa,
+		lista,controlacliente, art_descarga_long_defecto, art_descarga_barra_defecto, art_descarga_desc_defecto
+		,promo_inmediata, msj_tecla13_promo_inmediata, promo_detallada );
+
+}
+

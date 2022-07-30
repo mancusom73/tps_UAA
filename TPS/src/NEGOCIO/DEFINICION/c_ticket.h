@@ -1,0 +1,5 @@
+#ifndef C_TICKET_H
+#define C_TICKET_H
+void CONSULTA_TICKET();
+void RECUPERA_VENTANA_TICKET();
+#endif

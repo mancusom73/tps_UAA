@@ -1,0 +1,156 @@
+#pragma pack (push,1) 
+#ifndef NETCOM2_H
+#define NETCOM2_H
+/* ------------------------------------------------------------------------------
+ * Sistema: TPV 1000 - IV
+ * Definicin de datos para comunicacin mediante protocolos de red
+ * ------------------------------------------------------------------------------
+ */
+
+#define TCP_IP  1
+#define IPX     2
+#define T_FILE  3
+
+#define ERROR_LOCAL   1
+#define NODO_CTA_CTE  9
+
+#define CANAL_TRANSACCION  0
+#define CANAL_POR_GRUPO    1
+#define CANAL_PERMANENTE   2
+
+
+// Cod_rta
+#define Aceptada 0
+#define Denegada 1
+
+// Cod_accion
+#define Ninguna                      0
+#define Pedir_autorizacion           1
+#define Mostrar_importe_autorizado   2
+#define Pedir_autorizacion_si_desea  3
+#define PIN_invalido                 4
+#define Sin_saldo                    5
+
+
+#define REVERSABLE     1
+#define NO_REVERSABLE  0
+
+#define TIPO_MENSAJE_COMPRA                  200
+#define TIPO_MENSAJE_REVERSO                 400
+#define COD_PROC_COBRO_ON_LINE               800000
+#define COD_PROC_CONSULTA_SALDO              310000
+#define ERROR_MARCADA_COMO_ENVIADA           99
+#define ERROR_FALLO_AL_ENVIAR                98
+#define ERROR_COMUNICACION_AUT_ON_CON_NODO   97
+#define ERROR_FALLA_INTEGRIDAD               96
+
+#define SWITCH_NCR_T1       0x5431
+#define SWITCH_NCR_T2       0x5432
+#define SWITCH_NCR_T3       0x5433
+#define SWITCH_NCR_T4       0x5434
+#define SWITCH_NCR_T5       0x5435
+#define SWITCH_NCR_T7       0x5437
+#define SWITCH_NCR_T8       0x5438
+#define SWITCH_NCR_C1       0x4331
+#define SWITCH_NCR_TR       0x5452
+
+
+#define CANTIDAD_DE_VALORES_DE_CLAVE  96
+
+#define _VERSION_BLOQUE_A_ENCRIPTAR   1
+
+struct _bloque_a_encriptar
+{
+    char track_1[80];
+    char track_2[38];
+    char fecha_expiracion[4];       // AAMM
+    short int cvv;
+};
+
+#ifdef DEFINE_ENCRIPTA_TRANSACCIONES
+
+struct _tran_datos_encrip {
+	BINARY status;			//0
+	long id_transaccion;    //1
+	char enviado;			//5
+	//struct _bloque_encriptado datos;
+	struct _bloque_encriptado_2 datos;
+	BINARY fin;
+};
+
+struct _datos_desencriptados {
+   char      numero_de_comercio[15];//148
+   short int lote;      //238
+   char      numero_cuenta_tarjeta[21];   //45
+   long      autorizacion;        //123
+   long      numero_de_trace;       //129
+   char      retrieval_reference_number[12]; //201
+   char      plan;          //93
+   char      cuotas;          //94
+};
+#endif
+
+int CERRAR_CANAL_NETCOM2();
+int NETCOM2_FORMATO_MENSAJE_TCP();
+int SWITCH_NCR_CARGAR_RESPUESTAS();
+int SWITCH_NCR_TRANSFORMAR_RTA( int rta_switch );
+void SWITCH_NCR_AGREGAR_CAMPO_NUMERICO( char *buffer_out, int id_campo, int len, long dato );
+void SWITCH_NCR_ARMAR_PAQUETE_REQ( struct _transac2 *transac2, char *buffer_out,
+                                   int *l_buffer_out );
+void NETCOM2_ARMAR_PAQUETE_REQ( struct _transac2 *transac2, char *buffer_out,
+                                int *l_buffer_out );
+int NETCOM2_PROCESAR_PAQUETE_RTA( char *buffer_in, struct _datos_transaccion *tran_temp,
+                                  struct _transac2 *transac2 );
+void SWITCH_NCR_AGREGAR_CAMPO_CADENA( char *buffer_out, int id_campo, int len, char *dato );
+char *SWITCH_NCR_TIPO_PAQUETE( struct _transac2 *transac2 );
+int SWITCH_NCR_TIPO_PAQUETE_INT( struct _transac2 *transac2 );
+int SWITCH_NCR_PROCESAR_PAQUETE_RTA( char *buffer_in, struct _datos_transaccion *tran_temp,
+                                     struct _transac2 *transac2 );
+long SWITCH_NCR_OBTENER_ENTERO( char *buffer_in, int offset, int len );
+void SWITCH_NCR_VERIFICAR_CAMPO( char *cadena, int l );
+int NETCOM2_ENVIAR_CONFIRMACION( struct _transac2 *transac2,
+                                 struct _datos_transaccion *tran_temp );
+void NETCOM2_ARMAR_PAQUETE_CONFIRMACION( struct _transac2 *transac2, char *buffer_out,
+                                         int *l_buffer_out, struct _datos_transaccion *tran_temp );
+int SWITCH_NCR_OBTENER_CAMPO( int orden, char separador, char *buffer_out, int l_buffer_out,
+                              char *buffer_in );
+void _GRABA_LOG_FALLA_INTEGRIDAD( char *men, struct _datos_transaccion *tran );
+int T_AGREGAR_TRANSACCION( struct _datos_transaccion *tran, long nro, int operacion );
+void ENCRIPTA_UN_TRACK( int lo, unsigned fecha, char *track_normal, char *track_enciptado );
+void DESENCRIPTA_UN_TRACK( int lo, unsigned fecha, char *track_enciptado, char *track_normal );   
+void CRIPTER_DE_UN_TRACK( int lo, char *charKey1, unsigned key2, char *charCipherText,
+                          char *charNewText );
+void T_ENCRIPTAR_DATOS_TARJETA( void );
+int NETCOM2_CARGAR_CLAVES( void );
+void T_ENCRIPTAR_DATOS_TARJETA_RSA( void );
+int TEF_HABILITADO( void );
+int ENVIAR_TRANSACCION_AL_AUT_ON( int operacion, double importe, struct _rta_terminal *rta_terminal,
+                                  int nodo );
+int T_ENVIAR_TRANSACCION( int nodo, int operacion, double importe );
+int T_ENVIAR( int nodo, int operacion );
+int CARGA_TRANSACCION( long nro_transaccion );
+void MARCAR_ENVIADA_SI_HUBO_ERROR( long nro_tran, int operacion );
+void T_REVERSAR_TRANSACCION_SI_ES_NECESARIO();
+int T__REVERSAR_TRANSACCION( long nro );
+int T_DUPLICAR_TRANSACCION( long nro );
+int T_ABRIR_TRANSAC2();
+long T_CALCULA_NRO_TRANSACCION();
+void T_CIERRE( int tipo_de_cierre );
+void T_BUSCAR_PRIMERA_TRANSACCION_A_ENVIAR( int nodo );
+int ABRIR_CANAL_NETCOM2( int protocolo, int reintentos );
+void T_CORREGIR_ENVIO_FALLIDO();
+void T_COMIENZO_NETCOM2();
+void LIBERA_MEMORIA_NETCOM2();
+void CARGA_TABLA_OPERACIONES();
+void CARGA_TABLA( int operacion, int tipo_de_mensaje, long codigo_de_procesamiento, int reversable,
+                  char prioridad, char un_solo_intento, char espera_rta );
+void BUSCA_MENSAJE_EN_TABLA( int operacion, int *tipo_de_mensaje, long *codigo_de_procesamiento,
+                             int tipo_cuenta );
+int BACKUP_TRANSAC2();
+int CHEQUEA_INTEGRIDAD();
+void GRABA_LOG_FALLA_INTEGRIDAD();
+void COPIAR_RTA();
+void ABRIR_CANAL_TARJETAS();
+void NETCOM2_FORMATEAR_AUTORIZACION( char *cod_autorizacion, int modo );
+#endif
+#pragma pack (pop) 

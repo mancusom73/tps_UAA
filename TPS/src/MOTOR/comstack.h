@@ -1,0 +1,92 @@
+#pragma pack (push,1) 
+#pragma pack (1)
+
+typedef enum { 
+EvNUM,
+/* Operaciones Binarias Aritmeticas */
+EvSUM,
+EvSUB,
+EvMULT,
+EvFDIV,
+EvMOD,
+EvDIV,
+EvMAX,
+EvMIN,
+EvLEQ, EvLESS, EvEQUAL, EvGREATER, EvGEQ, EvNEQ, EvECOND, /* Operaciones Binarias Booleanas */
+EvAND, EvOR, EvLOG, /* Operaciones Binarias de Multiconjuntos */
+EvUNION, EvINTERSECTION, EvIN, EvMEET, /* Operaciones Binarias de Strings */
+EvCONCAT, /* Operaciones Unarias */
+EvAMOUNT,
+EvCOMPLEMENT, EvSIZE, EvLENGTH, EvNUM_RNV, EvBOOL_RNV, EvCOUNTABLE, EvROUND, EvTRUNC, /* */
+EvDOT, EvINTERVAL, /* Sets, AMSets*/
+EvSET, EvAMSET, EvPART, /* Constructores IDENT */
+EvIDENT, EvDEPARTMENT, EvPOINT, EvBONUS, EvARTICLE, EvCARD, /* Valor de Fecha y Hora */
+EvDATEV, EvTIMEV, /* Valores Booleanos*/
+EvTRUE, EvFALSE, EvINPUT, EvNUMINPUT, /* */
+EvHOLIDAY, EvAFFILIATED, EvALL, EvPURCHASE, EvTIME, EvDATE, EvDAY, EvCASH, EvMEANS, /* DAYS*/
+EvMONDAY, EvTUESDAY, EvWEDNESDAY, EvTHURSDAY, EvFRIDAY, EvSATURDAY, EvSUNDAY, /* BENEFS */
+EvASSIGN,
+EvIF,
+EvFOR,
+EvPRINT,
+EvCREDIT,
+EvDISTRIBUTE, EvISSUE_BONUS, EvGIVE_POINTS, EvACTIVATE, EvEPROC, EvSKIP, EvCOMP, /* REGISTROS DE EVENTOS */
+EvREQ_MEANS, EvREQ_MEANS_CANT,
+EvREC_PROMOID, EvREC_PROMOID_OLD,
+EvREC_ARTS,
+EvREC_DEP,
+EvREC_MEAN,
+EvREC_CLASS,
+EvREC_ALL,
+EvREC_PERFIL, EvREC_CREDIT, EvREC_BONUS, EvREC_POINTS, EvACTIVATE_MEAN, EvREC_STRING, /* PARAMS */
+EvPARAM, EvPARAMS, /* PROMOS */
+EvPROMO, /* PROG */
+EvPROG, /* EXTRAS */
+SWAP,
+SWAP_2,
+SWAP_3,
+EvUPDATE,
+EvBONUS_UPDATE,
+EvBENEF,
+EvCONDS,
+//EvCOND,
+IF_COND_CONDS,
+IF_PRECONDS_PROMO,
+EvPRECONDS,
+IF_COND_PRECONDS,
+EvEXPR,
+IF_CONDS_BENEF,
+IF_THEN_ELSE,
+FREE,
+LINK_AMSET,
+LINK_SET,
+EvFOREACH,
+LINK_PART,
+BELONGS,
+SACAR_ML,
+CHANFLE,
+IF_BELONG_UNION,
+IF_BELONG_INTERSECTION,
+NUM_RNV_UPDATE,
+BOOL_RNV_UPDATE,
+STRING_RNV_UPDATE,
+DATE_RNV_UPDATE,
+TIME_RNV_UPDATE,
+CHANFLE2, RESTE, RESTAR, TOMAR_MIN, TOMAR_MAX, COMPLEMENTAR, POP_EXTERN_VARS, PUSH_GLOBAL_VARS } comm;
+
+
+
+typedef struct cstack
+{
+    comm top;
+    struct cstack *next;
+} *cstack;
+
+cstack cs_push( cstack cs, comm c );
+
+comm cs_pop( cstack *cs );
+
+cstack cs_free( cstack cs );
+
+
+#pragma pack (pop) 

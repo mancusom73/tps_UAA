@@ -1,0 +1,39 @@
+Microsoft Visual Studio Solution File, Format Version 7.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AppMainVS7", "AppMainVS7.vcproj", "{A6BEAFA2-267F-4381-8830-A934397976FB}"
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		ConfigName.0 = Debug
+		ConfigName.1 = Debug DLL
+		ConfigName.2 = Debug Unicode
+		ConfigName.3 = Debug Unicode DLL
+		ConfigName.4 = Release
+		ConfigName.5 = Release DLL
+		ConfigName.6 = Release Unicode
+		ConfigName.7 = Release Unicode DLL
+	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{A6BEAFA2-267F-4381-8830-A934397976FB}.Debug.ActiveCfg = Debug|Win32
+		{A6BEAFA2-267F-4381-8830-A934397976FB}.Debug.Build.0 = Debug|Win32
+		{A6BEAFA2-267F-4381-8830-A934397976FB}.Debug DLL.ActiveCfg = Debug|Win32
+		{A6BEAFA2-267F-4381-8830-A934397976FB}.Debug DLL.Build.0 = Debug|Win32
+		{A6BEAFA2-267F-4381-8830-A934397976FB}.Debug Unicode.ActiveCfg = Debug|Win32
+		{A6BEAFA2-267F-4381-8830-A934397976FB}.Debug Unicode.Build.0 = Debug|Win32
+		{A6BEAFA2-267F-4381-8830-A934397976FB}.Debug Unicode DLL.ActiveCfg = Debug|Win32
+		{A6BEAFA2-267F-4381-8830-A934397976FB}.Debug Unicode DLL.Build.0 = Debug|Win32
+		{A6BEAFA2-267F-4381-8830-A934397976FB}.Release.ActiveCfg = Release|Win32
+		{A6BEAFA2-267F-4381-8830-A934397976FB}.Release.Build.0 = Release|Win32
+		{A6BEAFA2-267F-4381-8830-A934397976FB}.Release DLL.ActiveCfg = Release|Win32
+		{A6BEAFA2-267F-4381-8830-A934397976FB}.Release DLL.Build.0 = Release|Win32
+		{A6BEAFA2-267F-4381-8830-A934397976FB}.Release Unicode.ActiveCfg = Release|Win32
+		{A6BEAFA2-267F-4381-8830-A934397976FB}.Release Unicode.Build.0 = Release|Win32
+		{A6BEAFA2-267F-4381-8830-A934397976FB}.Release Unicode DLL.ActiveCfg = Release|Win32
+		{A6BEAFA2-267F-4381-8830-A934397976FB}.Release Unicode DLL.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

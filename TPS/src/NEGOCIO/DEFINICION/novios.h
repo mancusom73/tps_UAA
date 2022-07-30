@@ -1,0 +1,4 @@
+#ifndef NOVIOS_H
+#define NOVIOS_H
+void ENVIAR_TRANSACCIONES_NOVIOS();
+#endif
