@@ -163,3 +163,96 @@ int GRABA_BANDERA_T_FILE( int bandera )
     return ( rta );
 }
 
+/****************************************************************************/
+int _ENVIAR_PAQUETE_NAPSE( char *paquete, int l_paquete, char *rta, int l_rta,
+                            int time_out_disponible )
+/****************************************************************************/
+{
+    /* pasos
+	1 El sistema de venta pone una orden en la base de datos (tabla de Oracle det_operaciones_napse) con el
+número de terminal asociado a la caja y el importe y el id del comprobante generado (factura, N/D, ticketfactura,
+etc.). Luego con el uso de una API de Windows “lanza” la aplicación de NAPSE, que es independiente
+al sistema de venta (instalada en la pc local) y queda a la espera de una respuesta.
+
+2 Al iniciar, la aplicación de NAPSE verifica en la base de datos si existe una orden para procesar con el número
+de terminal asociado, si existe muestra los datos al usuario para generar el cupón con los siguientes datos
+
+3 Se procesa el pedido solicitando lectura de PinPad , en caso de ser
+aprobada se actualiza el registro en la base de datos con todos los
+datos del cupón, luego se cierra para dar por terminada la
+operación.
+En caso de no aprobarse, se avisa al operador con la respuesta
+devuelta y queda a la espera (puede volver a intentar o cancelar la
+operación definitavente.
+
+4 Si el pago se aprobó se imprime el cupón de la operación
+		
+	*/
+	
+	int error = 1;
+    #ifdef COMPILAR_ON_LINE
+    int handle;
+    /*---------------------- Crea el archivo de envio ------------------------*/
+    #if defined(INVEL_W) || defined(INVEL_L)
+    handle = CREAT_( _SEND, S_IFREG | S_IWRITE | S_IREAD );
+    #else
+    handle = CREAT( _SEND, FA_ARCH );
+    #endif
+    /*-------------- Verifica condiciones de la comunicacion ----------------*/
+    if( handle < 4 ) {
+        MENSAJE_STRING( S_PROBLEMA_ENVIAR_DATOS );
+    }
+    else if( LEE_BANDERA_T_FILE() == _NO_COMUNICACION ) {
+        MENSAJE_STRING( S_SERVER_FUERA_LINEA );
+        _CLOSE( handle, __LINE__, __FILE__ );
+    }
+    else if( LEE_BANDERA_T_FILE() == _CAJA_OFF_LINE ) {
+        MENSAJE_STRING( S_TPV_FUERA_LINEA );
+        _CLOSE( handle, __LINE__, __FILE__ );
+    }
+    else {
+        /*--------------- Verifica disponibilidad del server --------------*/
+        /*      MENSAJE_SIN_SONIDO( "ESPERANDO ATENCION DEL SERVER ..." );
+         * if( !ESPERAR_BANDERA_T_FILE( _SERVER_DISPONIBLE, time_out_disponible, _HAY_RESPUESTA ) ) {
+         * MENSAJE( "EL SERVER NO ATENDIO EL LLAMADO !" );
+         * _CLOSE( handle , __LINE__, __FILE__ );
+         * }
+         * else { */
+        /*---------------------- Envia el paquete ------------------------*/
+        error = 2;
+        _WRITE( handle, paquete, l_paquete, __LINE__, __FILE__ );
+        _CLOSE( handle, __LINE__, __FILE__ );
+        GRABA_BANDERA_T_FILE( _ESPERA_ATENCION );
+        /*---------------------- Espera que lo atiendan -----------------------*/
+        if( !ESPERAR_BANDERA_T_FILE( _ATENDIDO, 20, _HAY_RESPUESTA ) ) {
+            MENSAJE_STRING( S_SERVER_NO_ATIENDE_ATEN );
+        }
+        else {
+            MENSAJE_SIN_SONIDO_STRING( S_ATENDIDO_ESPERANDO_RESPUESTA );
+            if( !ESPERAR_BANDERA_T_FILE( _HAY_RESPUESTA, 130, NO ) ) {
+                MENSAJE_STRING( S_SERVER_NO_RESPONDIO );
+            }
+            else {
+                /*--------------------- Lee la respuesta ----------------------*/
+                #if defined(INVEL_W) || defined(INVEL_L)
+                handle = OPEN( _RECEIVE, O_RDWR );
+                #else
+                handle = OPEN( _RECEIVE, O_RDWR | O_DENYNONE );
+                #endif
+                if( handle > 3 ) {
+                    _READ( handle, rta, l_rta, __LINE__, __FILE__ );
+                    error = 0;
+                    _CLOSE( handle, __LINE__, __FILE__ );
+                    GRABA_BANDERA_T_FILE( _RESPUESTA_TOMADA );
+                }
+                else {
+                    MENSAJE_STRING( S_PROBLEMA_LEER_RESPUEST );
+                }
+            }
+        }
+        //      }
+    }
+    BORRAR_MENSAJE();
+    #endif
+    return ( 0/*error*/ );
+}

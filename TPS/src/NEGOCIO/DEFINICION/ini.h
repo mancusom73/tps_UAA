@@ -113,6 +113,7 @@ struct _config_tps
 	char RutaFtp[50];
 	int AlicuotasEnArticulo;
 	int ModificarAlicuotaDeArticuloConsFinal;
+	int NapseModalidad;
 }config_tps; //actualizar la estuctura en la clase CConfigTPS
 
 int GET_POSICION_PANTALLAS_X(void);

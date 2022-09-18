@@ -291,7 +291,10 @@ int T_ENVIAR_TRANSACCION( int nodo, int operacion, double importe )
     OPEN_RECUPERO( &_ptr, &_handle );
     _estado = STACK_INS( sizeof( short ) );
     /*----------------- Define el protocolo a utilizar -----------------*/
-    protocolo = TCP_IP;
+	if( config_tps.NapseModalidad == 1)
+		protocolo = NAPSE;
+	else
+		protocolo = TCP_IP;
 	if( _ESTADO == 0 ) {
 		memset( aux_track2, 0, sizeof( aux_track2 ) );
         memset( aux_track1, 0, sizeof( aux_track1 ) );
@@ -685,7 +688,7 @@ int T_ENVIAR( int nodo, int operacion )
 {
     int h;
     int ok = 1;
-    if( operacion == _CIERRE_DE_LOTE ) {
+	if( operacion == _CIERRE_DE_LOTE && config_tps.NapseModalidad == 0) {
         if( CIERRE_DE_LOTE_POR_NODO ) {
             ok = T_ENVIAR_TRANSACCIONES_PENDIENTES( nodo, SI, 3 );
         }
@@ -1258,7 +1261,7 @@ static int T_ENVIAR_TRANSACCIONES_PENDIENTES( int nodo, int enviar_todas_las_ope
                 //#else
                 MENSAJE_SIN_SONIDO( mensa,NO );
                 //#endif
-                if( !ABRIR_CANAL_NETCOM2( protocolo, reintentos ) ) {
+                if( !ABRIR_CANAL_NETCOM2( protocolo, reintentos ) ) { 
                     error_al_abrir_el_canal = 1;
                     error = 1;
                     break;
@@ -1335,6 +1338,7 @@ static int T_ENVIAR_TRANSACCIONES_PENDIENTES( int nodo, int enviar_todas_las_ope
 			memset( buffer_in, 0, LEN_BUFFER_TCP ); 
 			reverso_inmediato = 0;
 
+//aca cambiar para napse
             error = _ENVIAR_PAQUETE( ( int )protocolo, ( char* )buffer_out, l_buffer_out,   //envio
                                      ( char* )buffer_in,
                                      /*LEN_BUFFER_TCP*/( sizeof( struct _datos_transaccion )
@@ -1776,6 +1780,9 @@ int CHEQUEA_INTEGRIDAD()
 /****************************************************************************/
 {
     int error = 0;
+	if(protocolo == NAPSE) {
+		error = 0;
+	}
     if( MODELO_TEF == _TEF_SWITCH_NCR ) {
         error = 0;
     }

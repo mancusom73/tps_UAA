@@ -583,6 +583,9 @@ int _ENVIAR_PAQUETE( int protocolo, char *paquete, int l_paquete, char *rta, int
         case T_FILE:
             error = _ENVIAR_PAQUETE_T_FILE( paquete, l_paquete, rta, l_rta, time_out_disponible );
             break;
+		case NAPSE:
+            error = _ENVIAR_PAQUETE_NAPSE( paquete, l_paquete, rta, l_rta, time_out_disponible );
+            break;
     }
     if( !error ) {
         DEBUG_PAQUETE( "RTA.BIN", rta, l_rta );

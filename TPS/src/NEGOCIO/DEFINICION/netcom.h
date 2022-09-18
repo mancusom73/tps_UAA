@@ -9,6 +9,7 @@
 #define TCP_IP  1
 #define IPX     2
 #define T_FILE  3
+#define NAPSE   4
 
 #define ERROR_LOCAL   1
 #define NODO_CTA_CTE  9

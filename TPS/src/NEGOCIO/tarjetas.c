@@ -1094,7 +1094,7 @@ int VALIDA_TARJETA( int consulta_saldo, int consulta_boletin, int operacion, int
 		// return 0; no tiene sentido cortar si no hay tarjetas para ese medio.
 	}
     //Fin de actualizacion del vector TARJ
-	if( TIPO_LECTOR_BANDA ) {
+	if( TIPO_LECTOR_BANDA && config_tps.NapseModalidad == 0 ) {
 		if( mensaje != NULL ) {
 			MENSAJE( mensaje );
 //			MOSTRAR_MENSAJE_UBUNTU( 1, mensaje, 15 );
@@ -1116,6 +1116,10 @@ int VALIDA_TARJETA( int consulta_saldo, int consulta_boletin, int operacion, int
             }
         }
         salir = 2;
+		if( marca_especial && !TECLADO_POSIFLEX ) {
+			//TECLADO_POSIFLEX : Se reutiliza esta variable provisoriamente y nos indica si solicita o no ingresar el nro de tarjetas.
+			salir = 4;
+		} 
     }
     Orden = NUMERO_PANEL_VALIDA_TARJETA;
     Response = PreparePanel( &pPanel, Orden );
@@ -1143,12 +1147,15 @@ int VALIDA_TARJETA( int consulta_saldo, int consulta_boletin, int operacion, int
                 if( _k == -65 ) {
                     UNGETCH( -65 );
                 }
-			} else if( k == -18 || ( PEDIR_MARCA_ESPECIAL_EN_T_MANUAL && !marca_especial ) ) {
+			} else if( k == -18 || ( config_tps.NapseModalidad == 1 || (PEDIR_MARCA_ESPECIAL_EN_T_MANUAL && !marca_especial ) )) {
                 if( !EN_CAMBIO_DE_MEDIOS()
                  || ( EN_CAMBIO_DE_MEDIOS() && PEDIR_SUBMEDIO_EN_CAMBIO_DE_MEDI ) ) {
-                    marca_especial = PIDE_MARCA_ESPECIAL();
-					BORRAR_MENSAJE();
-					MENSAJE_STRING( S_PASE_LA_TARJETA );
+					if(config_tps.NapseModalidad == 1) {
+						marca_especial = PIDE_MARCA_ESPECIAL();
+						BORRAR_MENSAJE();
+						MENSAJE_STRING( S_PASE_LA_TARJETA );
+					} //por el else deberia leerla
+					
                 }
             }
         }
@@ -1193,7 +1200,15 @@ int VALIDA_TARJETA( int consulta_saldo, int consulta_boletin, int operacion, int
 		EJECUTAR_SCRIPT_AUTOIT("killscript.exe","notificaciones", NO );//cierra cualquier notificacion 
 		//return 1;
 		return 0;
-		}
+	}if( salir == 4) {
+		//int cuotas = 0;
+
+        GRABAR_LOG_SISTEMA( "NO SOLICITA DATOS DE TARJETA - UNICAMENTE PIDE CUOTAS",LOG_VENTAS,4 );
+        marca = marca_especial - 1;
+		SET_MEMORY_CHAR( __var_tarjetas_tarjeta, marca );
+		SET_MEMORY_CHAR( __var_tarjetas_status, 1 );
+		return ( 1 );
+	} 
 	
 	if( ok ) {
 		double n_corto_temp = 0.0, n_corto_temp2 = 0.0;

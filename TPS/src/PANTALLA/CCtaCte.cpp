@@ -73,6 +73,7 @@ void  CConfigTPS::GetConfig_tps( struct _config_tps *auxi )
 	if( auxi->AlicuotasEnArticulo == 1 ) {
 		auxi->ModificarAlicuotaDeArticuloConsFinal= auxconfig.ModificarAlicuotaDeArticuloConsFinal;
 	}
+	auxi->NapseModalidad = auxconfig.NapseModalidad;
 	SET_VALORES_CONFIG_TPS(*auxi); 
 	
 }
@@ -133,7 +134,8 @@ CConfigTPS::CConfigTPS( string xmlname )
 	TAG_CambioMedioAutomatico = XMLString::transcode("CambioMedioAutomatico");
 	TAG_AlicuotasEnArticulo= XMLString::transcode("AlicuotasEnArticulo");
 	TAG_PadronesPorFTP = XMLString::transcode("PadronesPorFTP");
-	
+	TAG_NapseModalidad = XMLString::transcode("NapseModalidad");
+
 	ATTR_Version = XMLString::transcode("Version");
 	ATTR_TicketFacturaPermanente = XMLString::transcode("TicketFacturaPermanente");
 	ATTR_LecturaClienteBarra= XMLString::transcode("LecturaClienteBarra");
@@ -233,6 +235,10 @@ CConfigTPS::CConfigTPS( string xmlname )
 const XMLCh* xmlch_OptionR = currentElement->getAttribute(TAG_AlicuotasEnArticulo);
               m_OptionA = XMLString::transcode(xmlch_OptionR);
 			  auxconfig.AlicuotasEnArticulo = (!strcmp( m_OptionA, "SI")) ? 1 : 0;	
+
+			  xmlch_OptionA = currentElement->getAttribute(TAG_NapseModalidad);
+			  m_OptionA = XMLString::transcode(xmlch_OptionA);
+			  auxconfig.NapseModalidad = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
    //           break;  // Data found. No need to look at other elements in tree.
 		   } 
 			if( XMLString::equals(currentElement->getTagName(), TAG_Funcionalidades))

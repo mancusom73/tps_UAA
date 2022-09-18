@@ -157,6 +157,7 @@ class CConfigTPS
 	  XMLCh* TAG_CambioMedioAutomatico;
 	  XMLCh* TAG_PadronesPorFTP;
  	  XMLCh* TAG_AlicuotasEnArticulo;
+	  XMLCh* TAG_NapseModalidad;
 //aqui va los atributos
 	  XMLCh* ATTR_Version;
 	  XMLCh* ATTR_TicketFacturaPermanente;
@@ -234,6 +235,7 @@ class CConfigTPS
 	char RutaFtp[50];
 	int AlicuotasEnArticulo;
 	int ModificarAlicuotaDeArticuloConsFinal;
+	int NapseModalidad;
 	}auxconfig;
 /*	DOMNodeList *GetNodeByTagName( string name );
     int GetChildsByTagName(  string tagname, string name, string campo1 ,string buscar, string campo2 );

@@ -996,7 +996,7 @@ PAGOS_PIDE_PAGO( int modo, int ( funcion_val ) ( double importe ), int dev_cobro
                     GRABAR_LOG_SISTEMA_CONFIG("ENTRANDO FNCION PROCESAR DONACIONES",LOG_VARIOS,4);
                     if( PROCESAR_DONACIONES() ) {
 						GRABAR_LOG_SISTEMA_CONFIG("ENTRANDO FNCION PEDIR_AUTORIZACION_ON_LINE",LOG_VARIOS,4);
-                        if( PEDIR_AUTORIZACION_ON_LINE( 0, dev_cobro ) ) {
+						if( PEDIR_AUTORIZACION_ON_LINE( 0, dev_cobro ) ) {
                             if( ( funcion_val == NULL || funcion_val( RAM_TOTAL ) ) && VALIDAR_MONEDERO_ELECTRONICO( -RAM_RESTO ) ) {
 								GRABAR_LOG_SISTEMA_CONFIG("ENTRANDO FNCION DEBE_ABRIR_CAJON",LOG_VARIOS,4);
 								if( DEBE_ABRIR_CAJON(  ) ){
@@ -1759,7 +1759,7 @@ int PAGOS_INGRESA_PAGO( int nro, int modo, int dev_cobro  )
             }
 
 
-            if( ok && ( RAM_NOTA_CR || MODO_DEVOLUCION ) && RAM_REFERENCIA_NC && LIMITAR_NOTAS_DE_CREDITO_CON_TAR ) {
+			if( ok && ( RAM_NOTA_CR || MODO_DEVOLUCION ) && RAM_REFERENCIA_NC && LIMITAR_NOTAS_DE_CREDITO_CON_TAR ) {
                 int msg_error = 1;
                 struct _eventos eventos;
                 struct _ev_cont ev_cont;
@@ -1849,7 +1849,7 @@ int PAGOS_INGRESA_PAGO( int nro, int modo, int dev_cobro  )
 			}
 
             /*------------ Si fue pasada pero no pidio los datos -----------*/
-            if( ok && VAR_TARJETAS_STATUS == 1 ) {
+			if( ok && VAR_TARJETAS_STATUS == 1 ) {
                 if( !PIDE_DATOS_TARJETA( NO, medios[nro].nro ) ) {
                     CEREAR_STRUCT( _var_tarjetas );
                     ok = 0;

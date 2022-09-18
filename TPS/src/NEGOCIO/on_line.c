@@ -167,7 +167,7 @@ int PEDIR_AUTORIZACION_ON_LINE( char origen, int dev_cobro )
             if( VARIAS_TARJETAS_POR_PAGO ) {
                 ok = LEE_TARJETAS( posicion, TARJETA_TRADICIONAL );
             }
-            if( ok && EXIGE_AUTORIZACION_ON_LINE() ) {
+			if( ok && EXIGE_AUTORIZACION_ON_LINE() ) {
                 char num_tarj[21];
                 int opcion = 0;
                 double importe;

@@ -392,4 +392,5 @@ void SET_VALORES_CONFIG_TPS(struct _config_tps auxi)
 	}
 	config_tps.AlicuotasEnArticulo= auxi.AlicuotasEnArticulo;
 	config_tps.ModificarAlicuotaDeArticuloConsFinal= auxi.ModificarAlicuotaDeArticuloConsFinal;
+	config_tps.NapseModalidad = auxi.NapseModalidad;
 }
