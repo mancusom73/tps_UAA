@@ -86,6 +86,7 @@
 #define ARCH_REC_COBROS_KINACU				"../REC/cobros_kinacu.rec"
 #define _PINPAD_DAT							"../TABLAS/pinpad.dat"
 #define _ARCH_PWK							"../REC/pwkey.dat"  //archivo donde guardo temporal el pin del pinpad
+#define _NAPSE_DAT							"../TABLAS/napse.dat"
 
 /*archivos en comun*/
 #define PATH_FOTO             "../../IMG/COMUN/USR/"

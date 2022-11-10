@@ -191,26 +191,6 @@ operación definitavente.
 	
 	int error = 1;
     #ifdef COMPILAR_ON_LINE
-    int handle;
-    /*---------------------- Crea el archivo de envio ------------------------*/
-    #if defined(INVEL_W) || defined(INVEL_L)
-    handle = CREAT_( _SEND, S_IFREG | S_IWRITE | S_IREAD );
-    #else
-    handle = CREAT( _SEND, FA_ARCH );
-    #endif
-    /*-------------- Verifica condiciones de la comunicacion ----------------*/
-    if( handle < 4 ) {
-        MENSAJE_STRING( S_PROBLEMA_ENVIAR_DATOS );
-    }
-    else if( LEE_BANDERA_T_FILE() == _NO_COMUNICACION ) {
-        MENSAJE_STRING( S_SERVER_FUERA_LINEA );
-        _CLOSE( handle, __LINE__, __FILE__ );
-    }
-    else if( LEE_BANDERA_T_FILE() == _CAJA_OFF_LINE ) {
-        MENSAJE_STRING( S_TPV_FUERA_LINEA );
-        _CLOSE( handle, __LINE__, __FILE__ );
-    }
-    else {
         /*--------------- Verifica disponibilidad del server --------------*/
         /*      MENSAJE_SIN_SONIDO( "ESPERANDO ATENCION DEL SERVER ..." );
          * if( !ESPERAR_BANDERA_T_FILE( _SERVER_DISPONIBLE, time_out_disponible, _HAY_RESPUESTA ) ) {
@@ -219,39 +199,22 @@ operación definitavente.
          * }
          * else { */
         /*---------------------- Envia el paquete ------------------------*/
-        error = 2;
-        _WRITE( handle, paquete, l_paquete, __LINE__, __FILE__ );
-        _CLOSE( handle, __LINE__, __FILE__ );
+    
+		GUARDAR_OPERACION_NAPSE();
+		
+
         GRABA_BANDERA_T_FILE( _ESPERA_ATENCION );
         /*---------------------- Espera que lo atiendan -----------------------*/
-        if( !ESPERAR_BANDERA_T_FILE( _ATENDIDO, 20, _HAY_RESPUESTA ) ) {
+		if( !ESPERAR_BANDERA_T_FILE( _ATENDIDO, 20, _HAY_RESPUESTA ) ) {
             MENSAJE_STRING( S_SERVER_NO_ATIENDE_ATEN );
         }
-        else {
+		else {
             MENSAJE_SIN_SONIDO_STRING( S_ATENDIDO_ESPERANDO_RESPUESTA );
             if( !ESPERAR_BANDERA_T_FILE( _HAY_RESPUESTA, 130, NO ) ) {
                 MENSAJE_STRING( S_SERVER_NO_RESPONDIO );
             }
-            else {
-                /*--------------------- Lee la respuesta ----------------------*/
-                #if defined(INVEL_W) || defined(INVEL_L)
-                handle = OPEN( _RECEIVE, O_RDWR );
-                #else
-                handle = OPEN( _RECEIVE, O_RDWR | O_DENYNONE );
-                #endif
-                if( handle > 3 ) {
-                    _READ( handle, rta, l_rta, __LINE__, __FILE__ );
-                    error = 0;
-                    _CLOSE( handle, __LINE__, __FILE__ );
-                    GRABA_BANDERA_T_FILE( _RESPUESTA_TOMADA );
-                }
-                else {
-                    MENSAJE_STRING( S_PROBLEMA_LEER_RESPUEST );
-                }
-            }
         }
         //      }
-    }
     BORRAR_MENSAJE();
     #endif
     return ( 0/*error*/ );

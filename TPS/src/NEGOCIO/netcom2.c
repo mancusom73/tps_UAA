@@ -125,6 +125,9 @@ void MOSTRAR_MENSAJE_UBUNTU( int icono, char *pMsg, int segTimeout );
 long PEDIR_ENTERO_EN_RECUADRO( char *titulo, int salvar_pantalla, int digitos );
 void ABRIR_DOCUMENTO_NO_FISCAL( char slip );
 int  reverso_inmediato = 0;
+void GUARDAR_OPERACION_NAPSE( void );
+void SETEOS_VALORES_RESPUESTA_SIMULADOS( );
+void LEER_OPERACION_NAPSE( void );
 
 int T_ANULAR_TRANSACCION( long nro_ticket, double *importe_t, int *nodo_t, UINT16 *modo_pago, int *cuota, long *fecha, int cashback );
 unsigned char RC5key[CANTIDAD_DE_VALORES_DE_CLAVE] =    // claves alternativas
@@ -1399,7 +1402,7 @@ static int T_ENVIAR_TRANSACCIONES_PENDIENTES( int nodo, int enviar_todas_las_ope
 				if( transac2->operacion != _CIERRE_DE_LOTE ) { //cierre de lote no devuelve rta.
 					error = CHEQUEA_INTEGRIDAD(  );
 				}
-                if( !error ) {
+				if( !error ) {
                     // el aut-on me contesta que tubo error de comunicacion
                     COPIAR_RTA();
                     if( transac2->dt.codigo_de_respuesta == 1
@@ -1781,7 +1784,7 @@ int CHEQUEA_INTEGRIDAD()
 {
     int error = 0;
 	if(protocolo == NAPSE) {
-		error = 0;
+		return error = 0;
 	}
     if( MODELO_TEF == _TEF_SWITCH_NCR ) {
         error = 0;
@@ -1951,16 +1954,21 @@ int NETCOM2_PROCESAR_PAQUETE_RTA( char *buffer_in, struct _datos_transaccion *tr
 /****************************************************************************/
 {
     int error = 0;
-    switch( MODELO_TEF ) {
-        case _TEF_AUTON:
-            memcpy( tran_temp, buffer_in, sizeof( struct _datos_transaccion ) );
-            break;
-        case _TEF_SWITCH_NCR:
-            memcpy( tran_temp, &transac2->dt, sizeof( struct _datos_transaccion ) );
-            error = SWITCH_NCR_PROCESAR_PAQUETE_RTA( buffer_in, tran_temp, transac2 );
-            break;
-    }
-    return( error );
+	if(config_tps.NapseModalidad ==0 ) {
+		switch( MODELO_TEF ) {
+			case _TEF_AUTON:
+				memcpy( tran_temp, buffer_in, sizeof( struct _datos_transaccion ) );
+				break;
+			case _TEF_SWITCH_NCR:
+				memcpy( tran_temp, &transac2->dt, sizeof( struct _datos_transaccion ) );
+				error = SWITCH_NCR_PROCESAR_PAQUETE_RTA( buffer_in, tran_temp, transac2 );
+				break;
+		}
+		return( error );
+	} else {
+		SETEOS_VALORES_RESPUESTA_SIMULADOS();
+		LEER_OPERACION_NAPSE();
+	}
 }
 /****************************************************************************/
 int NETCOM2_FORMATO_MENSAJE_TCP()
@@ -3548,4 +3556,111 @@ int PROCESA_DATOS_ENCRIPT_TRANSACCION2( int encripta , long nro_transaccion,stru
 			   
 			}
 			return 0;
+}
+
+/*****************************************************************************/
+void GUARDAR_OPERACION_NAPSE( void )
+/*****************************************************************************/
+{
+   int       handle_napse;
+   char     *buffer_voucher = NULL;
+
+   handle_napse = _CREAT( "napse.dat", /*S_IFREG |*/ S_IWRITE | S_IREAD /*| O_BINARY*/, __LINE__, __FILE__ );
+   if( handle_napse > 0 ) {
+  //    buffer_voucher = MALLOC( SIZEOF_STRUCT( _var_tarjetas ) );
+	   memcpy( buffer_in, &transac2->dt, sizeof( struct _datos_transaccion ) );
+      if( buffer_in ) {
+	     LSEEK( handle_napse, 0L, SEEK_SET, __LINE__, __FILE__ );
+         _WRITE( handle_napse, ( char * ) buffer_in, sizeof( struct _datos_transaccion ) - sizeof( transac2->dt.reserva1 ),__LINE__, __FILE__ );
+		// _WRITE( handle_voucher, ( char * ) buffer_voucher, SIZEOF_STRUCT( _var_tarjetas ),__LINE__, __FILE__ );
+	//	 FREEMEM( buffer_voucher );
+    //     buffer_voucher = 0;
+      }
+	  _close( handle_napse );
+   }
+}
+
+/*****************************************************************************/
+void SETEOS_VALORES_RESPUESTA_SIMULADOS( )
+/*****************************************************************************/
+
+{
+	memcpy( tran_temp->autorizacion_alfa, "00112233440",sizeof( transac2->dt.autorizacion_alfa ) );
+
+    memcpy( tran_temp->pin_working_key, "", 8 );
+    memcpy( tran_temp->retrieval_reference_number, "123456789012", 12 );
+
+    memcpy( tran_temp->mensaje, "campo mensaje", 37 );
+	  tran_temp->codigo_de_respuesta = 0;////este tenemos que ver que ponemos 
+/*
+	  0 0 "APROBADA "
+1 2 "PEDIR AUTORIZACION"
+2 2 "PEDIR AUTORIZACION"
+3 3 "COMERCIO INVALIDO"
+4 3 "CAPTURAR TARJETA"
+5 3 "DENEGADA"
+7 3 "RETENGA Y LLAME"
+*/
+
+	if( tran_temp->codigo_de_respuesta == 7 ){
+		tran_temp->ticket_original = tran_temp->ticket;
+	}
+    tran_temp->importe_cuota = 1;//tran_temp->importe_cuota;
+    tran_temp->saldo = 0;//tran_temp->saldo;
+    tran_temp->lote = 100;//tran_temp->lote;
+    tran_temp->autorizacion = 112233;//tran_temp->autorizacion;
+    memcpy( tran_temp->autorizacion_alfa, "00112233440",sizeof( transac2->dt.autorizacion_alfa ) );
+    
+    tran_temp->fecha_contable = 0;
+    tran_temp->fecha_host = 0;
+    tran_temp->hora_host = 0;
+    memcpy( tran_temp->nro_cuenta, "", sizeof( transac2->dt.nro_cuenta ) );
+    tran_temp->tasa_aplicada = 0;
+	memcpy( tran_temp->nro_cuenta2, "191977003661",
+		sizeof( transac2->dt.nro_cuenta2 ) );
+//if(&tran_temp->bloque_encriptado.buffer[0]!= &transac2->dt.bloque_encriptado.buffer[0] )//||&tran_temp->bloque_encriptado.buffer[0]==',')
+//		memcpy( transac2->dt.bloque_encriptado.buffer, tran_temp->bloque_encriptado.buffer, sizeof( transac2->dt.bloque_encriptado.buffer ) );
+	
+	tran_temp->ticket = 23459946;
+
+	/*if( transac2->operacion == _ON_LINE_COMPRA ) 
+		transac2->dt.importe = tran_temp->importe;
+		*/
+
+	//aca guardemos el nro de lote por si en algun momento queda offline y tengamos el ultimo
+	if( tran_temp->lote > 0 && tran_temp->nodo < 10 ) { //limitados hasta 10 nodos y menores de 10 solo para los offline
+		//la posicion la da el nodo
+		_SET_MEMORY_LONG( __pago_datafono, tran_temp->nodo, tran_temp->lote );
+	}
+
+	
+}
+/*****************************************************************************/
+void LEER_OPERACION_NAPSE( void )
+/*****************************************************************************/
+{
+	int       handle_voucher;
+   char     *buffer_voucher = NULL;
+   struct _datos_transaccion *tran_temp = NULL;
+
+   tran_temp = (struct _datos_transaccion *)MALLOC( sizeof( struct _datos_transaccion ) );
+	 memset( tran_temp, 0, sizeof( struct _datos_transaccion ) );
+	if( access( "napse.dat", 0 ) == 0 ) {
+      handle_voucher = _OPEN( "napse.dat", O_RDONLY, __LINE__, __FILE__ );
+      if( handle_voucher > 0 ) {
+         buffer_voucher = ( char * ) MALLOC( sizeof( struct  _datos_transaccion));
+         if( buffer_voucher ) {
+               _READ( handle_voucher, buffer_voucher, sizeof( struct _datos_transaccion ) , __LINE__, __FILE__ );
+                memcpy( tran_temp, buffer_voucher, sizeof( struct _datos_transaccion ) );
+//-- Acá hay que imprimir el voucher con los datos de la estructura Tarjeta.
+           
+            }
+//fin for
+			FREEMEM( buffer_voucher );
+			buffer_voucher = 0;
+         }
+		 _close( handle_voucher );
+	}
+   unlink("napse.dat");
+
 }
