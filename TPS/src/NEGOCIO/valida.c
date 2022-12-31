@@ -1300,9 +1300,14 @@ void VALIDA_ejecutar_comando( int *ind_config, int h, int ind_posicion, int modo
 			}
             break;
         case _NOMBRE_CLIENTE_TRACK_I:
-            OBTIENE_NOMBRE_CLIENTE( mensaje, h );
-            if( strcmp( mensaje, "NO" ) != 0 ) {
-               MOSTRAR_CADENA( columna, PRN, mensaje );
+			if(config_tps.NapseModalidad == 0) {
+				OBTIENE_NOMBRE_CLIENTE( mensaje, h );
+				if( strcmp( mensaje, "NO" ) != 0 ) {
+				   MOSTRAR_CADENA( columna, PRN, mensaje );
+				}
+			}else {
+				OBTIENE_NOMBRE_CLIENTE_NAPSE(mensaje, h);
+				MOSTRAR_CADENA( columna, PRN, mensaje );
 			}
             break;
         case _INSTITUCION:

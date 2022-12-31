@@ -3109,6 +3109,36 @@ struct _plu
 	BINARY cod_sucursal; 
 	BINARY fin;		
 };
+struct _respuesta_napse {   
+    BINARY status;          //0      
+	long id_evento;         //1
+	long caja_z;            //5
+	long id_transaccion;
+	long autorizacion;       // 9 
+	long     ticket;        //13
+	char     autorizacionTelefono[10]; //17
+	long      numero_de_comercio; //27
+	long      numero_de_terminal;//31
+	long    lote; //35
+	char	  tarjeta[20]; //39
+	char      tipo_lectura[11]; //59
+	long      tipo_de_tarjeta;//70
+	char      comercio_tarjeta[20];//74
+	long 	cpte_original; //94
+	long 	nro_transaccion; //98
+	char	nombre_titular[40];//102
+	char	identifica_tarjeta[20]; //142
+	char 	nro_cuenta[10]; //161
+	char	modo_autorizacion[10]; //172
+	char	apl[20]; //182
+	char	apn[20]; //202
+	char	env_data[20]; //222
+	long  	pin_verified; //242
+	long    tipo_cta; //246
+	char 	fhcpte_original[10]; //250
+	long   estado; //260
+	BINARY  fin;	//264
+};
 
 #include "dbrouter.h"
 #include <jgateway.h>

@@ -132,6 +132,8 @@ int INICIALIZA_ARCHIVOS( int inicial )
     }
     if( PROTOCOLO_AUTORIZACION_TARJETA == _TCP_IP ) {
         T_ABRIR_TRANSAC2();
+		if(config_tps.NapseModalidad ==1)
+			T_ABRIR_NAPSE();
     }
     if( _HUBO_CLOSE_ALL ) {
         _HUBO_CLOSE_ALL = NO;

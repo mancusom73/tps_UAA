@@ -70,6 +70,7 @@ struct _nodos
 	//char reserva[5];			//25
 };
 struct _transac2 *transac2;
+struct _respuesta_napse  *respuestaNapse;
 struct _ind2_transac2 ind2_transac2;
 struct _codigos_operacion *tabla_operaciones;
 static char *buffer_out,*buffer_in;
@@ -126,8 +127,9 @@ long PEDIR_ENTERO_EN_RECUADRO( char *titulo, int salvar_pantalla, int digitos );
 void ABRIR_DOCUMENTO_NO_FISCAL( char slip );
 int  reverso_inmediato = 0;
 void GUARDAR_OPERACION_NAPSE( void );
-void SETEOS_VALORES_RESPUESTA_SIMULADOS( );
 void LEER_OPERACION_NAPSE( void );
+void SETEOS_VALORES_RESPUESTA_NAPSE(int lecturaTabla);
+
 
 int T_ANULAR_TRANSACCION( long nro_ticket, double *importe_t, int *nodo_t, UINT16 *modo_pago, int *cuota, long *fecha, int cashback );
 unsigned char RC5key[CANTIDAD_DE_VALORES_DE_CLAVE] =    // claves alternativas
@@ -1627,6 +1629,8 @@ void T_COMIENZO_NETCOM2()
         tran_temp = (struct _datos_transaccion *)MALLOC( sizeof( struct _datos_transaccion ) );
         buffer_out = (char *)MALLOC( LEN_BUFFER_TCP );
         buffer_in = (char *)MALLOC( LEN_BUFFER_TCP );
+		respuestaNapse =  (struct _respuesta_napse *)MALLOC( sizeof( struct _respuesta_napse) );
+		
         if( !tran_rta || !transac2 || !buffer_out || !buffer_in ) {
             ABORT( "ERROR AL CARGAR NETCOM2" );
         }
@@ -1966,7 +1970,7 @@ int NETCOM2_PROCESAR_PAQUETE_RTA( char *buffer_in, struct _datos_transaccion *tr
 		}
 		return( error );
 	} else {
-		SETEOS_VALORES_RESPUESTA_SIMULADOS();
+		SETEOS_VALORES_RESPUESTA_NAPSE(SI);
 		LEER_OPERACION_NAPSE();
 	}
 }
@@ -3559,7 +3563,7 @@ int PROCESA_DATOS_ENCRIPT_TRANSACCION2( int encripta , long nro_transaccion,stru
 }
 
 /*****************************************************************************/
-void GUARDAR_OPERACION_NAPSE( void )
+void GUARDAR_OPERACION_NAPSE_DAT( void )
 /*****************************************************************************/
 {
    int       handle_napse;
@@ -3581,58 +3585,100 @@ void GUARDAR_OPERACION_NAPSE( void )
 }
 
 /*****************************************************************************/
-void SETEOS_VALORES_RESPUESTA_SIMULADOS( )
+void SETEOS_VALORES_RESPUESTA_NAPSE( int lecturaTabla)
 /*****************************************************************************/
-
+//aqui deberia ir la lectura de napse.dat que nos mandaron, aca lo simulo
 {
-	memcpy( tran_temp->autorizacion_alfa, "00112233440",sizeof( transac2->dt.autorizacion_alfa ) );
-
-    memcpy( tran_temp->pin_working_key, "", 8 );
-    memcpy( tran_temp->retrieval_reference_number, "123456789012", 12 );
-
-    memcpy( tran_temp->mensaje, "campo mensaje", 37 );
-	  tran_temp->codigo_de_respuesta = 0;////este tenemos que ver que ponemos 
-/*
-	  0 0 "APROBADA "
-1 2 "PEDIR AUTORIZACION"
-2 2 "PEDIR AUTORIZACION"
-3 3 "COMERCIO INVALIDO"
-4 3 "CAPTURAR TARJETA"
-5 3 "DENEGADA"
-7 3 "RETENGA Y LLAME"
-*/
-
-	if( tran_temp->codigo_de_respuesta == 7 ){
-		tran_temp->ticket_original = tran_temp->ticket;
-	}
-    tran_temp->importe_cuota = 1;//tran_temp->importe_cuota;
-    tran_temp->saldo = 0;//tran_temp->saldo;
-    tran_temp->lote = 100;//tran_temp->lote;
-    tran_temp->autorizacion = 112233;//tran_temp->autorizacion;
-    memcpy( tran_temp->autorizacion_alfa, "00112233440",sizeof( transac2->dt.autorizacion_alfa ) );
-    
-    tran_temp->fecha_contable = 0;
-    tran_temp->fecha_host = 0;
-    tran_temp->hora_host = 0;
-    memcpy( tran_temp->nro_cuenta, "", sizeof( transac2->dt.nro_cuenta ) );
-    tran_temp->tasa_aplicada = 0;
-	memcpy( tran_temp->nro_cuenta2, "191977003661",
-		sizeof( transac2->dt.nro_cuenta2 ) );
-//if(&tran_temp->bloque_encriptado.buffer[0]!= &transac2->dt.bloque_encriptado.buffer[0] )//||&tran_temp->bloque_encriptado.buffer[0]==',')
-//		memcpy( transac2->dt.bloque_encriptado.buffer, tran_temp->bloque_encriptado.buffer, sizeof( transac2->dt.bloque_encriptado.buffer ) );
 	
-	tran_temp->ticket = 23459946;
+	memcpy( tran_temp->pin_working_key, "", 8 );
+	tran_temp->fecha_contable = 0;
+	tran_temp->fecha_host = 0;
+	tran_temp->hora_host = 0;
+	tran_temp->importe = RAM_TOTAL;
+	if( transac2->operacion == _ON_LINE_COMPRA ) 
+			transac2->dt.importe = tran_temp->importe;
+	
+	if( lecturaTabla ==SI ) {
+		int area_ant = 0, tipo_ant = 0;
+		char sql[500];
+		CLOSE_TABLE( T_RESPUESTA_NAPSE , TT_ORIG );
+		if( T_ABRIR_NAPSE() ) {
+			MENSAJE_STRING( S_AREA_TRANSAC2_CERRADA );
+			return 0;
+		}
+		memset(sql,0,sizeof(sql));
 
-	/*if( transac2->operacion == _ON_LINE_COMPRA ) 
-		transac2->dt.importe = tran_temp->importe;
-		*/
+		area_ant = SELECTED2();
+		tipo_ant = SELECTED_TIPO();
+		SELECT_TABLE( T_RESPUESTA_NAPSE, TT_ORIG );
+		_snprintf(sql,sizeof(sql)-1,"id_transaccion = '%d' and id_evento = '%ld' and caja_z = '%ld'",13/* id_transaccion*/,77/* id_evento*/,100152/* _caja_z*/);
+		SET_WHERE( sql );
+		RUN_QUERY(NO);
+		if( FOUND2() ) { //encon
+			char autoalfa[11];
+			sprintf(autoalfa,"%li",respuestaNapse->autorizacion);
+			memcpy( tran_temp->autorizacion_alfa, autoalfa,sizeof( transac2->dt.autorizacion_alfa ) );
 
-	//aca guardemos el nro de lote por si en algun momento queda offline y tengamos el ultimo
-	if( tran_temp->lote > 0 && tran_temp->nodo < 10 ) { //limitados hasta 10 nodos y menores de 10 solo para los offline
-		//la posicion la da el nodo
-		_SET_MEMORY_LONG( __pago_datafono, tran_temp->nodo, tran_temp->lote );
+		}
+
+
+		
+	}else {
+	
+		memcpy( tran_temp->autorizacion_alfa, "00112233440",sizeof( transac2->dt.autorizacion_alfa ) );
+
+		
+		memcpy( tran_temp->retrieval_reference_number, "123456789012", 12 );
+
+		memcpy( tran_temp->mensaje, "campo mensaje", 37 );
+		tran_temp->codigo_de_respuesta = 0;////este tenemos que ver que ponemos 
+	/*
+		  0 0 "APROBADA "
+	1 2 "PEDIR AUTORIZACION"
+	2 2 "PEDIR AUTORIZACION"
+	3 3 "COMERCIO INVALIDO"
+	4 3 "CAPTURAR TARJETA"
+	5 3 "DENEGADA"
+	7 3 "RETENGA Y LLAME"
+	*/
+
+		if( tran_temp->codigo_de_respuesta == 7 ){
+			tran_temp->ticket_original = tran_temp->ticket;
+		}
+		tran_temp->importe_cuota = 1;//tran_temp->importe_cuota;
+		tran_temp->saldo = 0;//tran_temp->saldo;
+		tran_temp->lote = 100;//tran_temp->lote;
+		tran_temp->autorizacion = 112233;//tran_temp->autorizacion;
+		memcpy( tran_temp->autorizacion_alfa, "00112233440",sizeof( transac2->dt.autorizacion_alfa ) );
+	    
+
+		memcpy( tran_temp->nro_cuenta, "", sizeof( transac2->dt.nro_cuenta ) );
+		tran_temp->tasa_aplicada = 0;
+		memcpy( tran_temp->nro_cuenta2, "191977003661",
+			sizeof( transac2->dt.nro_cuenta2 ) );
+	//if(&tran_temp->bloque_encriptado.buffer[0]!= &transac2->dt.bloque_encriptado.buffer[0] )//||&tran_temp->bloque_encriptado.buffer[0]==',')
+	//		memcpy( transac2->dt.bloque_encriptado.buffer, tran_temp->bloque_encriptado.buffer, sizeof( transac2->dt.bloque_encriptado.buffer ) );
+		
+		tran_temp->ticket = 2345;
+		
+		memcpy( tran_temp->numero_cuenta_tarjeta, "493702******7499", sizeof( tran_temp->numero_cuenta_tarjeta ) );
+
+
+		tran_temp->tipo_de_cuenta = 0;
+
+		memcpy( tran_temp->bloque_encriptado.buffer,"VILLARREAL/MARCELO FABIAN" , sizeof( tran_temp->bloque_encriptado.buffer) );
+
+		SET_NUMERO_TARJETA_PRIVADO( "493702******7499");
+
+		
+
+
+		//aca guardemos el nro de lote por si en algun momento queda offline y tengamos el ultimo
+		if( tran_temp->lote > 0 && tran_temp->nodo < 10 ) { //limitados hasta 10 nodos y menores de 10 solo para los offline
+			//la posicion la da el nodo
+			_SET_MEMORY_LONG( __pago_datafono, tran_temp->nodo, tran_temp->lote );
+		}
 	}
-
 	
 }
 /*****************************************************************************/
@@ -3663,4 +3709,35 @@ void LEER_OPERACION_NAPSE( void )
 	}
    unlink("napse.dat");
 
+}
+
+/****************************************************************************/
+int T_ABRIR_NAPSE()
+/****************************************************************************/
+{
+	int ok = 1;
+    //return ( USE_DB( AREA_TRANSAC2, _TRANSAC2_SIC, ( char* )transac2,
+    //                 sizeof( struct _transac2_sic ), NULL, 0, 0 ) );
+	memset( respuestaNapse, 0, sizeof( struct _respuesta_napse ) );
+	if( OPEN_TABLE( T_RESPUESTA_NAPSE, TT_ORIG, ( char* )respuestaNapse, 
+					sizeof( struct _respuesta_napse ) ) == 0 ) {
+		SET_WHERE("");
+		RUN_QUERY(NO);
+		return( 0 );
+}
+	return( ok );
+
+}
+
+/*****************************************************************************/
+void OBTIENE_NOMBRE_CLIENTE_NAPSE( char *nombre, int p_pago )
+/*****************************************************************************/
+{
+	sprintf(nombre, tran_temp->bloque_encriptado.buffer, sizeof(tran_temp->bloque_encriptado.buffer));//Seba
+}
+
+/*****************************************************************************/
+void GUARDAR_OPERACION_NAPSE_MYSQL( void )
+/*****************************************************************************/
+{
 }

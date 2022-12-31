@@ -223,10 +223,11 @@
 #define T_ALICUOTA      	        177
 #define T_PORCPERC      	        178
 #define T_TOTAL_X      	            179
+#define T_RESPUESTA_NAPSE           180
 
 
 /*Suma total de tablas*/
-#define CANT_TABLAS			        180
+#define CANT_TABLAS			        181
 
 
 

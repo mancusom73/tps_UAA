@@ -200,7 +200,7 @@ operación definitavente.
          * else { */
         /*---------------------- Envia el paquete ------------------------*/
     
-		GUARDAR_OPERACION_NAPSE();
+		GUARDAR_OPERACION_NAPSE_DAT();
 		
 
         GRABA_BANDERA_T_FILE( _ESPERA_ATENCION );
