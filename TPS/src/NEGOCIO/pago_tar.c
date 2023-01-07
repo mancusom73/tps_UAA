@@ -173,9 +173,12 @@ int ON_LINE( int h, int dev_cobro, int posipago )
 	if( AUTORIZACION_ON_LINE( ( MODO_DEVOLUCION || RAM_NOTA_CR || dev_cobro ) ? _ON_LINE_DEVOLUCION
                             : _ON_LINE_COMPRA, _PAGO_IMPORTE( h ), ( char* )&rta_terminal,
                               sizeof( rta_terminal ) ) ) {
-        #ifdef COMPILAR_PINPAD
-        PINPAD_ACTUALIZAR_WORKING_KEY( VAR_TARJETAS_CELDA_PINPAD, rta_terminal.working_key );
-        #endif
+       
+		if(config_tps.NapseModalidad ==0) {
+			#ifdef COMPILAR_PINPAD
+			PINPAD_ACTUALIZAR_WORKING_KEY( VAR_TARJETAS_CELDA_PINPAD, rta_terminal.working_key );
+			#endif
+		}
     }
     else {
         /*------------- incrementa nro de cupon --------------*/
@@ -259,8 +262,13 @@ int ON_LINE( int h, int dev_cobro, int posipago )
             break;
         case 1:
             /* Error en la comunicacion */
+			if(config_tps.NapseModalidad ==1) {
+				strncpy( rta_terminal.mensaje, "OPERACION CON ERROR DESDE PINPAD",
+                     sizeof( rta_terminal.mensaje ) );
+			}else {
             strncpy( rta_terminal.mensaje, ST( S_ERROR_DE_COMUNICACION ),
                      sizeof( rta_terminal.mensaje ) );
+			}
             MOSTRAR_RESULTADO_ON_LINE( NO, rta_terminal.mensaje );
             if( VAR_TARJETAS_UNICAMENTE_OL ) {
                 //MENSAJE_STRING( S_LA_OPERACION_SOLO_PUEDE_SER_ON_LINE ); mensaje muy largo al combinar con mensaje de tecla

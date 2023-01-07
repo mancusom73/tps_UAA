@@ -186,11 +186,29 @@ devuelta y queda a la espera (puede volver a intentar o cancelar la
 operación definitavente.
 
 4 Si el pago se aprobó se imprime el cupón de la operación
-		
+///////////////AQUI LLAMAR AL AU3		
 	*/
+	char parametros[150];
+	int retval =0;
+	memset(parametros,0, 150);
+	sprintf(parametros,"%i %i ",1,13);
+
+	retval = EJECUTAR_SCRIPT_AUTOIT("napse.au3",parametros , SI);
+					{char mensa[50];
+					memset(mensa,0,sizeof(mensa));
+					sprintf(mensa,"Salio napse.au3 con codigo %i",retval);
+					glog(mensa,1,1);
+					}
+
+	 BORRAR_MENSAJE();
+	 if( retval == 3) {
+		 return 0;
+	 }
+//	( retval == 2 || retval == 1 || retval < 0) { //el 2 es error de oepracion el 1 es que se cayo el script
+    return ( 1/*error*/ );
 	
-	int error = 1;
-    #ifdef COMPILAR_ON_LINE
+	/*int error = 1;
+    #ifdef COMPILAR_ON_LINE*/
         /*--------------- Verifica disponibilidad del server --------------*/
         /*      MENSAJE_SIN_SONIDO( "ESPERANDO ATENCION DEL SERVER ..." );
          * if( !ESPERAR_BANDERA_T_FILE( _SERVER_DISPONIBLE, time_out_disponible, _HAY_RESPUESTA ) ) {
@@ -200,12 +218,12 @@ operación definitavente.
          * else { */
         /*---------------------- Envia el paquete ------------------------*/
     
-		GUARDAR_OPERACION_NAPSE_DAT();
+	//no va aca	GUARDAR_OPERACION_NAPSE_DAT();
 		
 
-        GRABA_BANDERA_T_FILE( _ESPERA_ATENCION );
+//        GRABA_BANDERA_T_FILE( _ESPERA_ATENCION );
         /*---------------------- Espera que lo atiendan -----------------------*/
-		if( !ESPERAR_BANDERA_T_FILE( _ATENDIDO, 20, _HAY_RESPUESTA ) ) {
+/*		if( !ESPERAR_BANDERA_T_FILE( _ATENDIDO, 20, _HAY_RESPUESTA ) ) {
             MENSAJE_STRING( S_SERVER_NO_ATIENDE_ATEN );
         }
 		else {
@@ -217,5 +235,5 @@ operación definitavente.
         //      }
     BORRAR_MENSAJE();
     #endif
-    return ( 0/*error*/ );
+    return ( 0 );*/
 }
