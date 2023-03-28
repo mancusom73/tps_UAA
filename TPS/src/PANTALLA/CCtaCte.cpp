@@ -74,6 +74,11 @@ void  CConfigTPS::GetConfig_tps( struct _config_tps *auxi )
 		auxi->ModificarAlicuotaDeArticuloConsFinal= auxconfig.ModificarAlicuotaDeArticuloConsFinal;
 	}
 	auxi->NapseModalidad = auxconfig.NapseModalidad;
+	auxi->Informes =auxconfig.Informes;
+	if( auxi->Informes == 1 ) {
+		auxi->ImprimirYdespuesDeZ = auxconfig.ImprimirYdespuesDeZ;
+		auxi->SaltearErrorFaltaZ = auxconfig.SaltearErrorFaltaZ;
+	}
 	SET_VALORES_CONFIG_TPS(*auxi); 
 	
 }
@@ -135,6 +140,7 @@ CConfigTPS::CConfigTPS( string xmlname )
 	TAG_AlicuotasEnArticulo= XMLString::transcode("AlicuotasEnArticulo");
 	TAG_PadronesPorFTP = XMLString::transcode("PadronesPorFTP");
 	TAG_NapseModalidad = XMLString::transcode("NapseModalidad");
+	TAG_Informes = XMLString::transcode("Informes");
 
 	ATTR_Version = XMLString::transcode("Version");
 	ATTR_TicketFacturaPermanente = XMLString::transcode("TicketFacturaPermanente");
@@ -159,6 +165,8 @@ CConfigTPS::CConfigTPS( string xmlname )
 	ATTR_MedioSubmedioEntrante = XMLString::transcode("MedioSubmedioEntrante");	
 	ATTR_MedioSubmedioSaliente = XMLString::transcode("MedioSubmedioSaliente");	
 	ATTR_RutaFtp = XMLString::transcode("RutaFtp");	
+	ATTR_ImprimirYdespuesDeZ = XMLString::transcode("ImprimirYdespuesDeZ");
+	ATTR_SaltearErrorFaltaZ = XMLString::transcode("SaltearErrorFaltaZ");
     
     parser = new XercesDOMParser();
     parser->setValidationScheme( XercesDOMParser::Val_Always );    // optional.
@@ -235,7 +243,8 @@ CConfigTPS::CConfigTPS( string xmlname )
 const XMLCh* xmlch_OptionR = currentElement->getAttribute(TAG_AlicuotasEnArticulo);
               m_OptionA = XMLString::transcode(xmlch_OptionR);
 			  auxconfig.AlicuotasEnArticulo = (!strcmp( m_OptionA, "SI")) ? 1 : 0;	
-
+			  m_OptionA = XMLString::transcode(xmlch_OptionR);
+			  auxconfig.Informes = (!strcmp( m_OptionA, "SI")) ? 1 : 0;	
 			  xmlch_OptionA = currentElement->getAttribute(TAG_NapseModalidad);
 			  m_OptionA = XMLString::transcode(xmlch_OptionA);
 			  auxconfig.NapseModalidad = (!strcmp( m_OptionA, "SI")) ? 1 : 0;
@@ -535,6 +544,23 @@ if( XMLString::equals(currentElement->getTagName(), TAG_AlicuotasEnArticulo)){
 									auxconfig.RutaFtp[49]=0;
 								}
 							}//fin PadronesxFtp
+							// inicio INformes
+							if( XMLString::equals(currentElement->getTagName(), TAG_Informes)){
+								const XMLCh* xmlch_OptionA = currentElement->getAttribute(ATTR_ImprimirYdespuesDeZ);
+								m_OptionA = XMLString::transcode(xmlch_OptionA);
+								if( m_OptionA != NULL){
+									strncpy(cadena2, m_OptionA,sizeof(cadena2));
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.ImprimirYdespuesDeZ= atoi(cadena2);
+								}
+								const XMLCh* xmlch_OptionB = currentElement->getAttribute(ATTR_SaltearErrorFaltaZ);
+								m_OptionB = XMLString::transcode(xmlch_OptionB);
+								 if( m_OptionB != NULL){ 
+									strncpy(cadena2, m_OptionB,50); 
+									cadena2[sizeof(cadena2) - 1] = 0;
+									auxconfig.SaltearErrorFaltaZ= atoi(cadena2);
+								}
+							}//FIN TAG_INformes
 						}
 					}
 			}

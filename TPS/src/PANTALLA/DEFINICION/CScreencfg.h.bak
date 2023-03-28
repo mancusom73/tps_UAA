@@ -69,8 +69,6 @@ class CIconRef;
 class CLang;
 class CTLabel;
 class CDesktop;
-class CCtaCte;
-class CPromoMayorista;
 class CConfigTPS;
 
 typedef struct
@@ -116,18 +114,13 @@ class CDesktop
 
     XercesDOMParser *parser;
     ErrorHandler *errHandler;
-#ifdef INVEL_L
-    xercesc_3_1::DOMDocument *document;
-#else
-	xercesc_2_7::DOMDocument *document;
-#endif
+    xercesc_2_7::DOMDocument *document;
 
 
     int error;
 
     DOMNodeList *GetNodeByTagName( string name );
     DOMNodeList *GetChildsByTagName( string tagname, string name );
-	
   public:
     CWindows *windows;
     CText *text;
@@ -148,62 +141,6 @@ class CDesktop
     CImages *GetImages();
 };
 
-class CCtaCte
-{
-  private:
-
-    XercesDOMParser *parser;
-    ErrorHandler *errHandler;
-#ifdef INVEL_L
-    xercesc_3_1::DOMDocument *document;
-#else
-	xercesc_2_7::DOMDocument *document;
-#endif
-
-
-    int error;
-
-
-  public:
-	DOMNodeList *GetNodeByTagName( string name );
-    int GetChildsByTagName(  string tagname, string name, string campo1 ,string buscar, string campo2 );
-	int GetChildsByTagName2( string tagname, string *name, string campo1 ,string buscar, string campo2 );
-
-    CCtaCte( string xmlname );
-    ~CCtaCte();
-
-    int GetErrorCode();
-
-	void write(DOMNode* node);
-	void writeElement(DOMElement* element);
-	void writeText(DOMText* text) ;
-};
-
-class CPromoMayorista
-{
-  private:
-
-    XercesDOMParser *parser;
-    ErrorHandler *errHandler;
-#ifdef INVEL_L
-    xercesc_3_1::DOMDocument *document;
-#else
-	xercesc_2_7::DOMDocument *document;
-#endif
-
-    int error;
-  public:
-	DOMNodeList *GetNodeByTagName( string name );
-    int GetChildsByTagName(  string tagname, string name, string campo1 ,string buscar, string campo2 );
-	int GetChildsByTagName2( string tagname, string *name, string campo1 ,string buscar, string campo2 );
-    CPromoMayorista( string xmlname );
-    ~CPromoMayorista();
-    int GetErrorCode();
-	void write(DOMNode* node);
-	void writeElement(DOMElement* element);
-	void writeText(DOMText* text) ;
-};
-
 class CConfigTPS
 {
   private:
@@ -214,26 +151,13 @@ class CConfigTPS
 	  XMLCh* TAG_Funcionalidades;
 	  XMLCh* TAG_TicketFacturaPermanente;
 	  XMLCh* TAG_LecturaClienteBarra;
-  	  XMLCh* TAG_PedirDatoAdicionalCierre;
-	  XMLCh* TAG_ControlarLimiteVenta;
-	  XMLCh* TAG_ControlarEnvases;
-	  XMLCh* TAG_ValidarArticuloPesable;
-	  XMLCh* TAG_ControlarCtaCte;
-	  XMLCh* TAG_ModalidadOffline;
-	  XMLCh* TAG_ModalidadInventario;
-	  XMLCh* TAG_ControlarRetiro;
-	  XMLCh* TAG_ComprobanteAnulado;
-	  XMLCh* TAG_NotificacionesUbuntu;
 	  XMLCh* TAG_ControlarMediosDePago;
-	  XMLCh* TAG_ListaPrecioxCliente;
-	  XMLCh* TAG_SoloPesablesCondecimales;
-	  //XMLCh* TAG_NoMultiplicarConDecimales;
-	  XMLCh* TAG_Informes;
-	  XMLCh* TAG_LecturaUsuarioBarra;
-	  XMLCh* TAG_ListaPrecioPermanente;
-	  XMLCh* TAG_AlicuotasEnArticulo;
-	  XMLCh* TAG_SupervisorNoMultiplicables;
-
+	  XMLCh* TAG_ClienteTarjetaEspecial;
+	  XMLCh* TAG_ActivarCashPlus;
+	  XMLCh* TAG_CambioMedioAutomatico;
+	  XMLCh* TAG_PadronesPorFTP;
+ 	  XMLCh* TAG_AlicuotasEnArticulo;
+	  XMLCh* TAG_NapseModalidad;
 //aqui va los atributos
 	  XMLCh* ATTR_Version;
 	  XMLCh* ATTR_TicketFacturaPermanente;
@@ -242,41 +166,23 @@ class CConfigTPS
       XMLCh* ATTR_DniCliente;
 	  XMLCh* ATTR_Prefijo_scanner_cliente;
 	  XMLCh* ATTR_EncabezadoTF;
-	  XMLCh* ATTR_Medio[9];
-	  XMLCh* ATTR_DatoAdicionalMedio[9];
-	  XMLCh* ATTR_DatoBusquedaMedio[9];
-	  XMLCh* ATTR_BloquearAlSuperaLimiteVenta;
-	  XMLCh* ATTR_MsjTecla_BloquearAlSuperaLimiteVenta;
-	  XMLCh* ATTR_ControlarDevolucionEnvases;
-	  XMLCh* ATTR_MsjTecla_i_EnvasesSinDevolver;
-	  XMLCh* ATTR_PedirSuperMenorMinimoPeso;
-	  XMLCh* ATTR_PedirSuperMenorMinimoImporte;
-	  XMLCh* ATTR_PedirSuperIngresoPesoManual;
-	  XMLCh* ATTR_AutorizarEnvases;
-	  XMLCh* ATTR_MsjTecla_AutorizarEnvases;
-	  XMLCh* ATTR_ClienteCtaCtePagos;
-	  XMLCh* ATTR_VerificarRedCadaXEventos;
-  	  XMLCh* ATTR_VerificarRedEnTipoEvento[9];
-	  XMLCh* ATTR_ImprimirInventarioReducido;
-	  XMLCh* ATTR_CodigoValidacionInventario;
-	  XMLCh* ATTR_PedirConfirmacionRetiroExcedido;
-  	  XMLCh* ATTR_ImprimirComprobanteAnulado;
-	  XMLCh* ATTR_VoucherComprobanteAnulado;
 	  XMLCh* ATTR_AgruparMediosEnImpresion;
 	  XMLCh* ATTR_CantMediosPermitidos;
 	  XMLCh* ATTR_InformarMediosExcedidos;
-	  XMLCh* ATTR_PermitirNCsuperadoLimiteVenta;
-	  XMLCh* ATTR_PedirAutorizacionTecla;
-	  XMLCh* ATTR_PedirAutorizacionCliente ;
-	  XMLCh* ATTR_ListasAutorizacion;
-	  //XMLCh* ATTR_UnidadesNOpermitidas;
-	  XMLCh* ATTR_ImprimirInformeYenZ;
-	  XMLCh* ATTR_DetectarPrefijoCliente;
-	  XMLCh* ATTR_PrefijoScannerSupervisor;
-	  XMLCh* ATTR_DetectarPrefijoSupervisor;
-	  XMLCh* ATTR_CodigoListaPrecio;
+	  XMLCh* ATTR_Codigo_seguridad_cliente;
+	  XMLCh* ATTR_Perfil_cliente_especial;
+	  XMLCh* ATTR_ValidacionCambioMediosCash;
+	  XMLCh* ATTR_MinimoaHabilitar;
+	  XMLCh* ATTR_HabilitarCashPlusSolo;
+	  XMLCh* ATTR_MontosValidos;
+	  XMLCh* ATTR_CambioMedioAutomatico;
+	  XMLCh* ATTR_PedirAutorizacionCambioMedioAutomatico;
+	  XMLCh* ATTR_ValidacionCambioMedioAutomatico;
+	  XMLCh* ATTR_PedirAutorizacionEnCierreConCambioMedio;
+	  XMLCh* ATTR_MedioSubmedioEntrante;	
+	  XMLCh* ATTR_MedioSubmedioSaliente;	
+	  XMLCh* ATTR_RutaFtp;
 	  XMLCh* ATTR_ModificarAlicuotaDeArticuloConsFinal;
-	
 
     XercesDOMParser *parser;
     ErrorHandler *errHandler;
@@ -288,74 +194,48 @@ class CConfigTPS
 	char* m_OptionA;
 	char* m_OptionB;
 	char* m_OptionC;
-	char* m_OptionA1[9];
-	char* m_OptionA2[9];
-	char* m_OptionA3[9];
     int error;
 
   public:
+	 struct _CambioMedio
+	{
+		int MedioEntrante;
+		int SubmedioEntrante;
+		int MedioSaliente;
+		int SubmedioSaliente;
+	};
+
 	  struct _config_tps2 
 	{
-	 int versionxml;
-	 int activarTFpermanente;
-	 int activarLecturaClienteBarra;
-	 char NombreCliente[17];
-     char DniCliente[15];
-	 char Prefijo_scanner_cliente[17];
-	 int encabezadoTF;
- 	 int PedirDatoAdicionalCierre;
-	 int CierreMedio[9];
-	 int DatoAdicionalMedio[9];
-	 char DatoAdiBusquedaMedio[9][25];
-	 int ControlarLimiteVenta;
-	 int BloquearAlSuperaLimiteVenta;
-	 char MsjTecla_BloquearAlSuperaLimiteVenta[100];
-	 int ControlarEnvases;
-	 int ControlarDevolucionEnvases;
-	 char MsjTecla_i_EnvasesSinDevolver[100];
-	 int ValidarArticuloPesable;
-	 double PedirSuperMenorMinimoPeso;
-	 double PedirSuperMenorMinimoImporte;
-	 int PedirSuperIngresoPesoManual;
-	 int AutorizarEnvases;
-	 char MsjTecla_AutorizarEnvases[100];
-	 int ControlarCtaCte;
-	 int ClienteCtaCtePagos;
- 	 int ModalidadOffline;
-	 int VerificarRedCadaXEventos;
-     int VerificarRedEnTipoEvento[9];
-	 int ModalidadInventario;
-	 int ImprimirInventarioReducido;
-	 int CodigoValidacionInventario;
-	 int ControlarRetiro;
-	 int PedirConfirmacionRetiroExcedido;
- 	 int ComprobanteAnulado;
-	 int ImprimirComprobanteAnulado;
-	 int VoucherComprobanteAnulado;
-	 int NotificacionesUbuntu;
-	 int ControlarMediosDePago;
-	 int AgruparMediosEnImpresion;
-	 int CantMediosPermitidos;
-	 int InformarMediosExcedidos;
-	 int PermitirNCsuperadoLimiteVenta;
-	 int ListaPrecioxCliente;
-	 int PedirAutorizacionTecla;
-	 int PedirAutorizacionCliente;
-	 int ListasAutorizacion[10];
-	 int SoloPesablesCondecimales;
-	 //int NoMultiplicarConDecimales;
-	 //char UnidadesNOpermitidas[20][6];
-	 int Informes;
-	 int ImprimirInformeYenZ;
-	 int LecturaUsuarioBarra;
-	 int DetectarPrefijoCliente;
-	 char PrefijoScannerSupervisor[17];
-	 int DetectarPrefijoSupervisor;
-	 int ListaPrecioPermanente;
-	 int CodigoListaPrecio;
-	 int AlicuotasEnArticulo;
-	 int ModificarAlicuotaDeArticuloConsFinal;
-	 int SupervisorNoMultiplicables;
+	int versionxml;
+	int activarTFpermanente;
+	int encabezadoTF;
+	int activarLecturaClienteBarra; 
+	char NombreCliente[17];
+    char DniCliente[15];
+	char Prefijo_scanner_cliente[5];
+	int ControlarMediosDePago;
+	int AgruparMediosEnImpresion;
+	int CantMediosPermitidos;
+	int InformarMediosExcedidos;
+	int ClienteTarjetaEspecial;
+	int Codigo_seguridad_cliente;
+	int Perfil_cliente_especial;
+	int ActivarCashPlus;
+	int ValidacionCambioMediosCash;
+	int MinimoaHabilitar;
+	int HabilitarCashPlusSolo;
+	float MontosValidos[10];
+	int CambioMedioAutomatico;
+	int PedirAutorizacionCambioMedioAutomatico;
+	int ValidacionCambioMedioAutomatico;
+	int PedirAutorizacionEnCierreConCambioMedio;
+	struct _CambioMedio det_CambioMedio[10]; 
+	int PadronesPorFTP;
+	char RutaFtp[50];
+	int AlicuotasEnArticulo;
+	int ModificarAlicuotaDeArticuloConsFinal;
+	int NapseModalidad;
 	}auxconfig;
 /*	DOMNodeList *GetNodeByTagName( string name );
     int GetChildsByTagName(  string tagname, string name, string campo1 ,string buscar, string campo2 );
@@ -363,7 +243,8 @@ class CConfigTPS
     CConfigTPS( string xmlname );
     ~CConfigTPS();
     //int GetErrorCode();
-	void GetConfig_tps( struct _config_tps* auxi );
+	void GetConfig_tps( struct _config_tps *auxi/* struct _config_tps auxi*/ );
+
 	
 /*	void write(DOMNode* node);
 	void writeElement(DOMElement* element);

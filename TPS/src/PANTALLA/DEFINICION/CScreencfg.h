@@ -158,6 +158,7 @@ class CConfigTPS
 	  XMLCh* TAG_PadronesPorFTP;
  	  XMLCh* TAG_AlicuotasEnArticulo;
 	  XMLCh* TAG_NapseModalidad;
+	  XMLCh* TAG_Informes;
 //aqui va los atributos
 	  XMLCh* ATTR_Version;
 	  XMLCh* ATTR_TicketFacturaPermanente;
@@ -183,6 +184,8 @@ class CConfigTPS
 	  XMLCh* ATTR_MedioSubmedioSaliente;	
 	  XMLCh* ATTR_RutaFtp;
 	  XMLCh* ATTR_ModificarAlicuotaDeArticuloConsFinal;
+	  XMLCh* ATTR_ImprimirYdespuesDeZ;
+	  XMLCh* ATTR_SaltearErrorFaltaZ;
 
     XercesDOMParser *parser;
     ErrorHandler *errHandler;
@@ -236,6 +239,9 @@ class CConfigTPS
 	int AlicuotasEnArticulo;
 	int ModificarAlicuotaDeArticuloConsFinal;
 	int NapseModalidad;
+	int Informes;
+	int ImprimirYdespuesDeZ;
+	int SaltearErrorFaltaZ;
 	}auxconfig;
 /*	DOMNodeList *GetNodeByTagName( string name );
     int GetChildsByTagName(  string tagname, string name, string campo1 ,string buscar, string campo2 );

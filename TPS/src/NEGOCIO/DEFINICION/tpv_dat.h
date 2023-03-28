@@ -3128,16 +3128,16 @@ struct _respuesta_napse {
 	long 	nro_transaccion; //98
 	char	nombre_titular[40];//102
 	char	identifica_tarjeta[20]; //142
-	char 	nro_cuenta[10]; //161
-	char	modo_autorizacion[10]; //172
-	char	apl[20]; //182
-	char	apn[20]; //202
-	char	env_data[20]; //222
-	long  	pin_verified; //242
-	long    tipo_cta; //246
-	char 	fhcpte_original[10]; //250
-	long   estado; //260
-	BINARY  fin;	//264
+	char 	nro_cuenta[20]; //161
+	char	modo_autorizacion[10]; //182
+	char	apl[20]; //192
+	char	apn[20]; //212
+	char	env_data[20]; //232
+	long  	pin_verified; //252
+	long    tipo_cta; //256
+	char 	fhcpte_original[10]; //260
+	long   estado; //270
+	BINARY  fin;	//274
 };
 
 #include "dbrouter.h"

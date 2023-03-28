@@ -768,18 +768,26 @@ Si existe algun error voy a esperar 10 teclas enter a que lo solucionen y sino s
 				rta = NO;
 				reintentos++;	
 				borrar = SI;
-				MENSAJE( ST(S_ERROR_IMPRESION_REVISE_IMPRESORA_P_E) ); 
-				GRABAR_LOG_SISTEMA(  ST(S_ERROR_IMPRESION_REVISE_IMPRESORA_P_E) , LOG_ERRORES,2 );
-				do{ 
-					if( LASTKEY()!=-999 ){//que no muestre tantas veces..
-						//BORRAR_MENSAJE();
-						MENSAJE( ST(S_ERROR_IMPRESION_REVISE_IMPRESORA_P_E) );
-					}
-				}while(GETCH() != 13);
-				//leo el nuevo estado a ver si cambia
-				if( borrar = SI)
-				BORRAR_MENSAJE();
-				borrar = NO;
+				
+				if( config_tps.SaltearErrorFaltaZ== 1 && ( NRO_MODO == 'Z'|| NRO_MODO == 'Y')){
+					MENSAJE_SIN_SONIDO( "-  LA IMPRESORA REQUIERE CIERRE FISCAL - AGUARDE..." ,10);
+					reintentos = 10;
+					SET_MEMORY_CHAR( __ram_impresion_fiscal, 0 );
+
+				} else {
+					MENSAJE( ST(S_ERROR_IMPRESION_REVISE_IMPRESORA_P_E) ); 
+					GRABAR_LOG_SISTEMA(  ST(S_ERROR_IMPRESION_REVISE_IMPRESORA_P_E) , LOG_ERRORES,2 );
+					do{ 
+						if( LASTKEY()!=-999 ){//que no muestre tantas veces..
+							//BORRAR_MENSAJE();
+							MENSAJE( ST(S_ERROR_IMPRESION_REVISE_IMPRESORA_P_E) );
+						}
+					}while(GETCH() != 13);
+					//leo el nuevo estado a ver si cambia
+					if( borrar = SI)
+					BORRAR_MENSAJE();
+					borrar = NO;
+				}
 
 				COMANDO_LEER_STATUS_PRINTER_FISCAL(1, NULL);
 				//un comprobante debe estar en curso abierto...	
@@ -3128,14 +3136,14 @@ int VERIFICAR_SERIAL_IMPRESORA( char* buffer,int size_buf_prn ){
 	int rta = SI;
 	
 	{
-		if(  CONTROLAR_SERIAL_PRINTER && !RAM_P_TICKET &&  size_buf_prn > 0 && strlen( buffer )>7  ){
+		if( /* CONTROLAR_SERIAL_PRINTER && */!RAM_P_TICKET &&  size_buf_prn > 0 && strlen( buffer )>7  ){
 			char * ptr,*ptr2;
 			strstr( buffer, "Serial" );
 			ptr = strstr( buffer, "Serial");
 			if(ptr){
-				char serial_aux[12];
-				char serial_aux_ant[12];
-				int longitud=12;
+				char serial_aux[17];
+				char serial_aux_ant[17];
+				int longitud=17;
 				rta = NO;
 				memset(serial_aux,0,sizeof(serial_aux));
 				memset(serial_aux_ant,0,sizeof(serial_aux_ant));
@@ -3157,13 +3165,13 @@ int VERIFICAR_SERIAL_IMPRESORA( char* buffer,int size_buf_prn ){
 				if( strlen( serial_aux )>3 && strlen( serial_aux_ant )> 3 && strnicmp(serial_aux_ant,serial_aux,longitud) == 0 ){
 					rta = SI;
 				}else{
-					char mensaje[100];
-					_snprintf( mensaje, sizeof(mensaje)-1,ST(S_EL_NUMER_CONFIGURADO___s__NO_COINCIDE),serial_aux_ant);
-					MENSAJE(mensaje);
-					GRABAR_LOG_SISTEMA(  mensaje , LOG_ERRORES,1 );
-					_snprintf( mensaje, sizeof(mensaje)-1,ST(S_CON_EL_SERIAL_DE_LA_IMPRESORA___s_),serial_aux);
-					MENSAJE(mensaje);
-					GRABAR_LOG_SISTEMA(  mensaje , LOG_ERRORES,1 );
+			//		char mensaje[100];
+			//		_snprintf( mensaje, sizeof(mensaje)-1,ST(S_EL_NUMER_CONFIGURADO___s__NO_COINCIDE),serial_aux_ant);
+			//		MENSAJE(mensaje);
+			//		GRABAR_LOG_SISTEMA(  mensaje , LOG_ERRORES,1 );
+			//		_snprintf( mensaje, sizeof(mensaje)-1,ST(S_CON_EL_SERIAL_DE_LA_IMPRESORA___s_),serial_aux);
+			//		MENSAJE(mensaje);
+			//		GRABAR_LOG_SISTEMA(  mensaje , LOG_ERRORES,1 );
 					CARGAR_SERIAL_IMPRESORA();
 					VERIFICA_CAMBIO_ARCHIVOS_ACTIVOS(NO);
 					_snprintf( serial_aux_ant, sizeof(serial_aux)-1, "%s",RAM_NRO_SERIE_IMPRESORA_ANT);
@@ -3176,7 +3184,14 @@ int VERIFICAR_SERIAL_IMPRESORA( char* buffer,int size_buf_prn ){
 
 
 				}
-				SET_MEMORY( __ram_nro_serie_impresora,serial_aux );
+				if( strlen( serial_aux ) > 3 ) {
+					SET_MEMORY( __ram_nro_serie_impresora, serial_aux );
+					rta = SI;
+				} else {
+					char mensaje[100];
+					_snprintf( mensaje, sizeof(mensaje)-1,ST(S_EL_NUMER_CONFIGURADO___s__NO_COINCIDE),serial_aux_ant);
+					GRABAR_LOG_SISTEMA(  mensaje , LOG_ERRORES,1 );
+				}
 
 			}
 		}

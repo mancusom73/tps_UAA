@@ -131,6 +131,7 @@ void LEER_OPERACION_NAPSE( void );
 void SETEOS_VALORES_RESPUESTA_NAPSE(int lecturaTabla);
 void GUARDAR_OPERACION_NAPSE_DAT( void );
 void COPIAR_RTA_NAPSE( void );
+long GET_ID_TRANSACCION( void) ;
 
 int T_ANULAR_TRANSACCION( long nro_ticket, double *importe_t, int *nodo_t, UINT16 *modo_pago, int *cuota, long *fecha, int cashback );
 unsigned char RC5key[CANTIDAD_DE_VALORES_DE_CLAVE] =    // claves alternativas
@@ -1384,7 +1385,7 @@ static int T_ENVIAR_TRANSACCIONES_PENDIENTES( int nodo, int enviar_todas_las_ope
                                              ( int )TIMEOUT_NODO( ( char )nodo ), SI,
                                              ( int )_CANAL_TARJETAS );
                     //--Que recibe de respuesta del completion??
-                }
+				}
                 else {
                     transac2->dt.codigo_de_respuesta = 1;
                     error = 1;
@@ -1976,9 +1977,14 @@ int NETCOM2_PROCESAR_PAQUETE_RTA( char *buffer_in, struct _datos_transaccion *tr
 		return( error );
 	} else {
 		SETEOS_VALORES_RESPUESTA_NAPSE(SI);
+		if(tran_temp->codigo_de_respuesta !=0){
+			error = 1;
+			return error ;
+		}
 		COPIAR_RTA();
 		GUARDAR_OPERACION_NAPSE_DAT();
 		LEER_OPERACION_NAPSE();
+		return error ;
 	}
 }
 /****************************************************************************/
@@ -3618,18 +3624,22 @@ void SETEOS_VALORES_RESPUESTA_NAPSE( int lecturaTabla)
 		area_ant = SELECTED2();
 		tipo_ant = SELECTED_TIPO();
 		SELECT_TABLE( T_RESPUESTA_NAPSE, TT_ORIG );
-		_snprintf(sql,sizeof(sql)-1,"id_transaccion = '%d' and id_evento = '%ld' and caja_z = '%ld'",13/* id_transaccion*/,77/* id_evento*/,100152/* _caja_z*/);
+		_snprintf(sql,sizeof(sql)-1,"id_transaccion = '%d' and id_evento = '%ld' and caja_z = '%ld'",transac2->id_transaccion,transac2->id_evento,transac2->caja_z);
 		SET_WHERE( sql );
 		RUN_QUERY(NO);
 		if( FOUND2() ) { //encon
 			char autoalfa[11];
-			sprintf(autoalfa,"%li",respuestaNapse->autorizacion);
-			memcpy( tran_temp->autorizacion_alfa, autoalfa,sizeof( transac2->dt.autorizacion_alfa ) );
+			
 			
 			if(respuestaNapse->estado == 1)
 				tran_temp->codigo_de_respuesta = 0;  //el 0 es ok para nosotros
-			else
+			else {
 				tran_temp->codigo_de_respuesta = respuestaNapse->estado; //chequear los codigos aqui que sirvan 
+				return 0;
+			}
+
+			sprintf(autoalfa,"%li",respuestaNapse->autorizacion);
+			memcpy( tran_temp->autorizacion_alfa, autoalfa,sizeof( transac2->dt.autorizacion_alfa ) );
 	/*		0 0 "APROBADA "
 	1 2 "PEDIR AUTORIZACION"
 	2 2 "PEDIR AUTORIZACION"
@@ -3738,4 +3748,11 @@ void COPIAR_RTA_NAPSE( void )
 	memcpy(transac2->dt.numero_cuenta_tarjeta,tran_temp->numero_cuenta_tarjeta , sizeof( tran_temp->numero_cuenta_tarjeta ) );
 	transac2->dt.tipo_de_cuenta = tran_temp->tipo_de_cuenta;
 
+}
+
+/*****************************************************************************/
+long GET_ID_TRANSACCION( void) 
+/*****************************************************************************/
+{
+	return transac2->id_transaccion;
 }

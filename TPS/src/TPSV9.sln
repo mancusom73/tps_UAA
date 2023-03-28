@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TPSV", "TPSV9.vcproj", "{A6
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libpromo", "MOTOR\libpromo9.vcproj", "{37149589-B4D1-4263-A123-B932EDD2409E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxWindowsVS9", "..\..\LIB\WXWINDOWS\WXWIN-FUENTE\src\wxWindowsVS9.vcproj", "{A28D47B5-77EC-469F-A002-F7C413E29DA2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxWindowsVS9", "..\..\..\..\LIB\WXWINDOWS\WXWIN-FUENTE\src\wxWindowsVS9.vcproj", "{A28D47B5-77EC-469F-A002-F7C413E29DA2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

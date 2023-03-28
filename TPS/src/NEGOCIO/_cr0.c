@@ -501,9 +501,9 @@ int CR0( char *version )
     if( MODO_DEBUG > 3 ) {
         GRABAR_LOG_SISTEMA_STRING( S_CHEQUEANDO_BTRIEVE ,LOG_DEBUG,2);
     }
-    if( !BTRIEVE_PRESENTE() ) {
+  /*  if( !BTRIEVE_PRESENTE() ) {
         CR0_EXIT( 1 );
-    }
+    }*/
     if( MODO_DEBUG > 3 ) {
         GRABAR_LOG_SISTEMA_STRING( S_BTRIEVE_CHEQUEADO ,LOG_DEBUG,2);
     }
@@ -1757,9 +1757,11 @@ void CR0_GENERAR_Z()
 		RESETEA_ACUMULADORES_Z();  // SUMA Z
 		GRABAR_XYZ( 'Y' );
 	} else 	{
-		if( FISCAL_Z(  ) != 1 ) {
-  			return;
-  		}
+		if(config_tps.ImprimirYdespuesDeZ == 0) {
+			if( FISCAL_Z(  ) != 1 ) {
+  				return;
+  			}
+		}
 		RESETEA_ACUMULADORES_Z(); 
 		GRABAR_XYZ( 'Y' );
 	}	

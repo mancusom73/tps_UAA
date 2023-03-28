@@ -586,14 +586,14 @@ int GRABAR_EVENT_TICKET( int grabar_all )
     }
 	SELECT_TABLE( T_EVENTOS, tipo_t_eventos );
     event_ticket.id_evento = RAM_ID_EVENTO;
-	if( CONTROLAR_SERIAL_PRINTER ){
+//	if( CONTROLAR_SERIAL_PRINTER ){
 		//numero obtenido
 		_snprintf( event_ticket.serial_impresora, 
 				sizeof(event_ticket.serial_impresora)-1, "%s",RAM_NRO_SERIE_IMPRESORA );
 		//numero configurado y autorizado
 		_snprintf( event_ticket.serial_impresora_ant, 
 			sizeof(event_ticket.serial_impresora_ant)-1, "%s",RAM_NRO_SERIE_IMPRESORA_ANT );
-	}
+//	}
 
     event_ticket.caja_z = ( long )( NRO_CAJA )*100000L + ( NRO_Z % 100000L );
     // event_ticket.fecha = ( UTILIZAR_DIA_OPERATIVO ) ? NRO_DIA_OPERATIVO : GET_FECHA_DOS();

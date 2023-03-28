@@ -37,6 +37,7 @@
 #include <deftables.h>
 #include <db.h>
 #include <path.h>
+#include <ini.h>
 /* ------------------------------------------------------------------------------
  * Sistema: TPV 1000 - IV
  * ------------------------------------------------------------------------------
@@ -171,9 +172,10 @@ void EMITIR_INFORME_00( int anterior, int est, char cierre, int ini_est )
     }
 	if( _ESTADO_DOS == 5 ) {
         #if (defined INVEL_L) || (defined INVEL_W)
-        if( IMPRESORA_FISCAL == FISCAL && !SINCRONIZAR_HORA_CONTROLADOR_FIS ) {
+        if( IMPRESORA_FISCAL == FISCAL && !SINCRONIZAR_HORA_CONTROLADOR_FIS 
+			||(IMPRESORA_FISCAL == FISCAL && config_tps.ImprimirYdespuesDeZ == 1)) {
             FISCAL_Z();
-        }   
+		} 
         #endif
         if( IMPRESORA_FISCAL == FISCAL_IBM_4610 ) {
             FISCAL_Z();

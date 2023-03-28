@@ -38,6 +38,7 @@
 #define _HAY_RESPUESTA      3
 #define _RESPUESTA_TOMADA   4
 #define _CAJA_OFF_LINE      5
+extern long GET_ID_TRANSACCION( void) ;
 /****************************************************************************/
 int _ENVIAR_PAQUETE_T_FILE( char *paquete, int l_paquete, char *rta, int l_rta,
                             int time_out_disponible )
@@ -191,7 +192,7 @@ operación definitavente.
 	char parametros[150];
 	int retval =0;
 	memset(parametros,0, 150);
-	sprintf(parametros,"%i %i ",1,13);
+	sprintf(parametros,"%i %li ",NRO_CAJA_DGI,GET_ID_TRANSACCION());
 
 	retval = EJECUTAR_SCRIPT_AUTOIT("napse.au3",parametros , SI);
 					{char mensa[50];

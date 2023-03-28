@@ -34,6 +34,7 @@
 #include <t_pago.h>
 #include <path.h>
 #include "import_t.h"
+#include <ini.h>
 
 /* ------------------------------------------------------------------------------
  * Sistema: TPV 1000 - IV
@@ -317,6 +318,15 @@ int MENU_INFORMES_Z( int con_menu )
                                 }
                                 SET_MEMORY_CHAR( __nro_modo, 'Z' );
                                 RECUPERO_DE_CHEQUES_CARGADOS();
+								if(config_tps.ImprimirYdespuesDeZ == 1) {//esto e para que haga el abrir doc no fiscal que venia mal por no tirar la z 									
+									char buffer_aux[20];
+									SET_MEMORY_CHAR( __ram_impresion_fiscal, 0 );	
+									memset(buffer_aux,0,sizeof(buffer_aux));
+									sprintf(buffer_aux,"&0&");
+									//actualizo el estado del comprobante para la bandera de impresion en CIMain
+									setData( ACTION_UPDATE_ESTADO_DOC_NO_FISCAL,buffer_aux, 20 );
+								}
+
                                 INFORME_00( _z, 0, NO );
 								if( MODO_NEGOCIO == SERVICIOS && EMITIR_INFORME_DIFERENCIAS_SUBME ) {
 									INFORME_DIFERENCIAS_SUBMEDIOS_CONTINUO( );

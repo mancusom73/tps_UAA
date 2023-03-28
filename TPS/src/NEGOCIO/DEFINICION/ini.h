@@ -114,6 +114,9 @@ struct _config_tps
 	int AlicuotasEnArticulo;
 	int ModificarAlicuotaDeArticuloConsFinal;
 	int NapseModalidad;
+	int Informes;
+	int ImprimirYdespuesDeZ;
+	int SaltearErrorFaltaZ;
 }config_tps; //actualizar la estuctura en la clase CConfigTPS
 
 int GET_POSICION_PANTALLAS_X(void);
