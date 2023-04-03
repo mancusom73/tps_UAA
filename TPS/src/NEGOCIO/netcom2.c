@@ -3607,10 +3607,7 @@ void SETEOS_VALORES_RESPUESTA_NAPSE( int lecturaTabla)
 	tran_temp->fecha_contable = 0;
 	tran_temp->fecha_host = 0;
 	tran_temp->hora_host = 0;
-	tran_temp->importe = RAM_TOTAL;
-	if( transac2->operacion == _ON_LINE_COMPRA ) 
-			transac2->dt.importe = tran_temp->importe;
-	
+
 	if( lecturaTabla ==SI ) {
 		int area_ant = 0, tipo_ant = 0;
 		char sql[500];
@@ -3629,13 +3626,19 @@ void SETEOS_VALORES_RESPUESTA_NAPSE( int lecturaTabla)
 		RUN_QUERY(NO);
 		if( FOUND2() ) { //encon
 			char autoalfa[11];
+
+			tran_temp->importe = transac2->dt.importe; //no deberia ser el total de la tarjeta?
+			/*if( transac2->operacion == _ON_LINE_COMPRA ) {
+				transac2->dt.importe = tran_temp->importe;
+			}*/
+	
 			
 			
 			if(respuestaNapse->estado == 1)
 				tran_temp->codigo_de_respuesta = 0;  //el 0 es ok para nosotros
 			else {
 				tran_temp->codigo_de_respuesta = respuestaNapse->estado; //chequear los codigos aqui que sirvan 
-				return 0;
+				return 1;
 			}
 
 			sprintf(autoalfa,"%li",respuestaNapse->autorizacion);

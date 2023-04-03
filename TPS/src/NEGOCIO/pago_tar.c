@@ -255,8 +255,10 @@ int ON_LINE( int h, int dev_cobro, int posipago )
 				diff = diff * -1;
             if( rta_terminal.importe > 0.001 
                     && ( diff >= 0.01) ) {
-                _SET_MEMORY_DOUBLE( __pago_importe_descuento, h, 
-                    _PAGO_IMPORTE( h ) - (rta_terminal.importe) );
+						if(config_tps.NapseModalidad == 0) { //ojo revisar si no afecta cashplus
+							_SET_MEMORY_DOUBLE( __pago_importe_descuento, h, 
+								_PAGO_IMPORTE( h ) - (rta_terminal.importe) );
+						}
                 _SET_MEMORY_DOUBLE( __pago_importe, h, rta_terminal.importe );             //xxx
             }
             break;

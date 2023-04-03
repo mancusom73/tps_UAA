@@ -27,6 +27,7 @@
 #include <tarjetas.h> 
 #include <tkt.h> 
 #include <aarch.h>
+#include <ini.h>
 /* ------------------------------------------------------------------------------
  * Sistema: TPV 1000 - IV
  * ------------------------------------------------------------------------------
@@ -316,16 +317,18 @@ int GRABAR_OFF_LINE( int tipo_operacion, double importe )
 void CIERRE_DE_LOTE( int tipo_de_cierre )
 /***********************************************************************/
 {
-    int error;
-    if( PROTOCOLO_AUTORIZACION_TARJETA == _TCP_IP ) {
-        T_CIERRE( tipo_de_cierre );
-    }
-    else {
-        error = APPEND( _OFF_LINE_ZZZ, _OFF_LINE_REMOTO );
-        LOG_EXISTE_ARCHIVO_COD( _OFF_LINE_REMOTO );
-        AUTORIZACION_ON_LINE( _CIERRE_DE_LOTE, 0, NULL, 0 );
-        CREAR_OFF_LINE( !error );
-    }
+    if(config_tps.NapseModalidad ==0) {
+		int error;
+		if( PROTOCOLO_AUTORIZACION_TARJETA == _TCP_IP ) {
+			T_CIERRE( tipo_de_cierre );
+		}
+		else {
+			error = APPEND( _OFF_LINE_ZZZ, _OFF_LINE_REMOTO );
+			LOG_EXISTE_ARCHIVO_COD( _OFF_LINE_REMOTO );
+			AUTORIZACION_ON_LINE( _CIERRE_DE_LOTE, 0, NULL, 0 );
+			CREAR_OFF_LINE( !error );
+		}
+	}
 }
 
 /***********************************************************************/
