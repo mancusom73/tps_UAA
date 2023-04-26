@@ -1112,6 +1112,9 @@ int VALIDA_TARJETA( int consulta_saldo, int consulta_boletin, int operacion, int
         if( PEDIR_MARCA_ESPECIAL_EN_T_MANUAL ) {
             if( !EN_CAMBIO_DE_MEDIOS()
              || ( EN_CAMBIO_DE_MEDIOS() && PEDIR_SUBMEDIO_EN_CAMBIO_DE_MEDI ) ) {
+				 if(config_tps.NapseModalidad == 1 && consulta_saldo == ANULACION){
+					MENSAJE( mensaje );
+				 }
                 marca_especial = PIDE_MARCA_ESPECIAL();
             }
         }

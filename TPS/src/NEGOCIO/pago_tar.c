@@ -220,11 +220,19 @@ int ON_LINE( int h, int dev_cobro, int posipago )
             SET_MEMORY_CHAR( __var_tarjetas_on_line, SI );
 			{
 				char auxil[13];
+				
 				 memset(auxil,0, sizeof(auxil));
 				_snprintf(auxil, sizeof(auxil) -1 ,rta_terminal.nro_referencia);
 				//rta_terminal.nro_referencia;
             //SET_MEMORY( __var_tarjetas_nro_ref, rta_terminal.nro_referencia ); //guarda aca que no pegue junto el mensaje y este campo
 				SET_MEMORY( __var_tarjetas_nro_ref, auxil ); //guarda aca que no pegue junto el mensaje y este campo
+				if(config_tps.NapseModalidad ==1 ){
+					char nrotarj[21];
+					memset(nrotarj,0,21);
+					GET_NUMERO_CUENTA_TARJETA( nrotarj);
+					SET_NUMERO_TARJETA_PRIVADO(nrotarj);
+					_SET_MEMORY( __pago_nro_tarjeta, h, GET_NUMERO_TARJETA_PRIVADO( ));
+				}
             //---- Esto debiera ser configurable
 			}
             SET_MEMORY_INT( __var_tarjetas_lote, rta_terminal.lote );
@@ -1238,7 +1246,7 @@ int PIDE_TARJETA_PARA_ANULAR( int *cancela_anula  ){
 		sprintf(mensaje," PASE LA TARJETA (%s) NUEVAMENTE PARA ANULAR LA COMPRA",num_tarj);
 
 		while( limite!= -1 && (!VALIDA_TARJETA( ANULACION, NO, VENTAS, NO,mensaje, NO, -1) ||  
-			 !ES_LA_MISMA_TARJETA(num_tarj,GET_NUMERO_TARJETA_PRIVADO()))  ){
+			!ES_LA_MISMA_TARJETA(num_tarj,GET_NUMERO_TARJETA_PRIVADO()))  ){
 				
 				
 				if( LASTKEY() ==27 || limite < 1 ) {
@@ -1258,7 +1266,11 @@ int PIDE_TARJETA_PARA_ANULAR( int *cancela_anula  ){
 					MOSTRAR_MENSAJE_UBUNTU( 0, ST(S_TARJETA_INCORRECTA), 4 );
 				}
 		}
-		
+		if( config_tps.NapseModalidad == 1) {
+			MENSAJE( mensaje );
+			MOSTRAR_MENSAJE_UBUNTU( 0, mensaje, 8 );
+		}
+				
 		if(limite<=0 || LASTKEY() == 27){
 			//GRABAR_LOG_SISTEMA_STRING( S_TARJETA_INCORRECTA, LOG_ERRORES,2 );
 			GRABAR_LOG_SISTEMA_STRING( S_NO_SE_PUEDE_REALIZAR_LA_ANULACION,LOG_ERRORES,2 );
@@ -1370,7 +1382,7 @@ int CARGA_VERIFICA_ANULA_TARJETAS(int handle, char *buffer,int h, int posicionta
 				int tecla = 0;
 				int condicion_anulacion = 0;
 				//VAR_TARJETAS_ON_LINE en 1 es online y en 2 es offline;
-				if( _VAR_TARJETAS_NRO_REF( 0 ) )
+				if( _VAR_TARJETAS_NRO_REF( 0 ) || config_tps.NapseModalidad == 1)
 					condicion_anulacion = 1;
 				else
 					condicion_anulacion = 2;

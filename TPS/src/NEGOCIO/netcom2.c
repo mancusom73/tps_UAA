@@ -1768,6 +1768,18 @@ int BACKUP_TRANSAC2()
     GRABAR_LOG_SISTEMA_STRING( S_BACKUP_TRANSAC2, LOG_VENTAS,2 );
 	BACKUP_ARCHIVO_DE_LA_SEMANA_SQL( GET_FECHA_BACKUP(), T_TRAN_CRP, _TRAN_CRP_BAK );
     BACKUP_ARCHIVO_DE_LA_SEMANA_SQL( GET_FECHA_BACKUP(),T_TRANSAC2, _TRANSAC2_BAK );
+	if(config_tps.NapseModalidad == 1) {
+		char aux[10];
+		char nombre_tabla_dest_tmp[80];
+		memset(nombre_tabla_dest_tmp,0,80);
+		CDAY( _FECHA_ARCHIVO, aux );
+		strcat(nombre_tabla_dest_tmp,"C:..\\BAK\\respuestaNapse_");
+		strcat(nombre_tabla_dest_tmp,aux);
+		strcat(nombre_tabla_dest_tmp,".bak");
+		BACKUP_ARCHIVO_DE_LA_SEMANA_SQL_NOMBRE( GET_FECHA_BACKUP(),T_RESPUESTA_NAPSE, nombre_tabla_dest_tmp );
+
+	}
+	
         ok = 1;
     return ok;
 }
@@ -3151,8 +3163,11 @@ Aqui enmascaramos los datos sensibles del transac2 que no se pueden mostrar
 //	memcpy( tran->numero_de_comercio,"*********", 9 );
     //tran->numero_de_comercio[9] = '\0';
 //    tran->lote = 0;
-    memcpy( tran->numero_cuenta_tarjeta,"*********", 9 );
-    tran->numero_cuenta_tarjeta[9] = '\0';
+	if( config_tps.NapseModalidad ==0) {
+		memcpy( tran->numero_cuenta_tarjeta,"*********", 9 );
+		tran->numero_cuenta_tarjeta[9] = '\0';
+	}
+    
 //    tran->autorizacion = 0L;
 //    tran->numero_de_trace = 0L;
     //memcpy( tran->retrieval_reference_number,"*********", 9 );
@@ -3757,5 +3772,14 @@ void COPIAR_RTA_NAPSE( void )
 long GET_ID_TRANSACCION( void) 
 /*****************************************************************************/
 {
+	
 	return transac2->id_transaccion;
+}
+
+/*****************************************************************************/
+void GET_NUMERO_CUENTA_TARJETA( char cadena[21]) 
+/*****************************************************************************/
+{
+	memcpy(cadena,transac2->dt.numero_cuenta_tarjeta, sizeof( transac2->dt.numero_cuenta_tarjeta ) );
+	cadena[20]=0;
 }

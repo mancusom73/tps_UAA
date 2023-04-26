@@ -161,7 +161,7 @@ AppMain::AppMain()
 
 	//esta linea es para releases --> 	_snprintf(VERSION.branch, sizeof(VERSION.branch)-1,"TPSV_%02i_%03i_R00n_mm",VERSION.version, VERSION.build);  
 	//esta linea es para proyecto de branch --> _snprintf(VERSION.branch, sizeof(VERSION.branch)-1, "%s","Sprint_<Nro_Sprint>_<Año>_<Proyecto_00_00>");
-    _snprintf(VERSION.branch, sizeof(VERSION.branch)-1,"TPSV_02_195_R006_103_Feature_2022_NAPSE_10",VERSION.version, VERSION.build);  
+    _snprintf(VERSION.branch, sizeof(VERSION.branch)-1,"TPSV_02_195_R006_103_Feature_2022_NAPSE_12",VERSION.version, VERSION.build);  
 	_snprintf(ver_posvisual, sizeof(ver_posvisual)-1, "TPS%2s - %02i.%03i", VERSION.producto,
              VERSION.version, VERSION.build );
     if(strlen(VERSION.branch) > 0){

@@ -28,6 +28,7 @@
 #include <tkt.h> 
 #include <aarch.h>
 #include <ini.h>
+#include <deftables.h>
 /* ------------------------------------------------------------------------------
  * Sistema: TPV 1000 - IV
  * ------------------------------------------------------------------------------
@@ -317,7 +318,7 @@ int GRABAR_OFF_LINE( int tipo_operacion, double importe )
 void CIERRE_DE_LOTE( int tipo_de_cierre )
 /***********************************************************************/
 {
-    if(config_tps.NapseModalidad ==0) {
+	if(config_tps.NapseModalidad ==0) {
 		int error;
 		if( PROTOCOLO_AUTORIZACION_TARJETA == _TCP_IP ) {
 			T_CIERRE( tipo_de_cierre );
@@ -327,6 +328,24 @@ void CIERRE_DE_LOTE( int tipo_de_cierre )
 			LOG_EXISTE_ARCHIVO_COD( _OFF_LINE_REMOTO );
 			AUTORIZACION_ON_LINE( _CIERRE_DE_LOTE, 0, NULL, 0 );
 			CREAR_OFF_LINE( !error );
+		}
+	} else {
+		int ok = 1, ok_backup = 0;
+		if( tipo_de_cierre == _CIERRE_DE_LOTE_EN_Z ) {
+        // el cierre manual no debe hacer back up
+        ok_backup = BACKUP_TRANSAC2();
+        if( ok && ok_backup ) {
+			SET_EMPTY_TABLE(T_TRANSAC2,TT_ORIG);
+        }
+#ifdef DEFINE_ENCRIPTA_TRANSACCIONES        
+		if( ok && ok_backup){
+				SET_EMPTY_TABLE(T_TRAN_CRP,TT_ORIG); 
+        }
+#endif  
+		if( ok && ok_backup){
+				SET_EMPTY_TABLE(T_RESPUESTA_NAPSE,TT_ORIG); 
+        }
+        
 		}
 	}
 }
