@@ -3652,7 +3652,7 @@ void SETEOS_VALORES_RESPUESTA_NAPSE( int lecturaTabla)
 			if(respuestaNapse->estado == 1)
 				tran_temp->codigo_de_respuesta = 0;  //el 0 es ok para nosotros
 			else {
-				tran_temp->codigo_de_respuesta = respuestaNapse->estado; //chequear los codigos aqui que sirvan 
+				tran_temp->codigo_de_respuesta = 2;//respuestaNapse->estado; //chequear los codigos aqui que sirvan 
 				return 1;
 			}
 
