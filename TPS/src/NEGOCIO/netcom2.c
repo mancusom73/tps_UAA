@@ -3696,8 +3696,10 @@ void SETEOS_VALORES_RESPUESTA_NAPSE( int lecturaTabla)
 				//la posicion la da el nodo
 				_SET_MEMORY_LONG( __pago_datafono, tran_temp->nodo, tran_temp->lote );
 			}
+		} else {
+			tran_temp->codigo_de_respuesta = 2;//respuestaNapse->estado; //chequear los codigos aqui que sirvan 
+			return 1;
 		}
-	
 	}
 	
 }
