@@ -924,7 +924,7 @@ void CR0_TOMAR_DIA_OPERATIVO( int onfly )
 			glog(mensa,LOG_VENTAS,2);
 
 		}
-		if( config.dia_operativo > NRO_DIA_OPERATIVO ) {//NRO_DIA_OPERATIVO = 08/10/10
+		if( config.dia_operativo >= NRO_DIA_OPERATIVO ) {//NRO_DIA_OPERATIVO = 08/10/10
             if( config.dia_operativo < NRO_PROXIMO_DIA_OPERATIVO_SERVIDOR ) {
                 dia = NRO_PROXIMO_DIA_OPERATIVO_SERVIDOR;
 				memset( aux, 0, sizeof( aux ) );
