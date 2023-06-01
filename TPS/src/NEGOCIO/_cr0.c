@@ -1226,7 +1226,7 @@ int CR0_INGRESA_CAJERO( int *es_supervisor, int *fondo_fijo_aut )
 		if( cajero > 0 ) {
 			if( SINCRONIZAR_HORA_CONTROLADOR_FIS  ) {
    				if( IMPRESORA_FISCAL == FISCAL  ) {
-   					ACTUALIZA_FECHA_Y_HORA_CONTROLADOR_FISCAL_EPSON(  );
+   			//se lo saque por las epson tm900 de uaa		ACTUALIZA_FECHA_Y_HORA_CONTROLADOR_FISCAL_EPSON(  );
    				}
    			}
 		}
@@ -1873,7 +1873,7 @@ void CR0_INIT_ARCHIVOS()
     }
 	if( SINCRONIZAR_HORA_CONTROLADOR_FIS ) {
 		if( IMPRESORA_FISCAL == FISCAL ) { 
-			ACTUALIZA_FECHA_Y_HORA_CONTROLADOR_FISCAL_EPSON(  );
+		//se lo saque por las epson tm900 de uaa	ACTUALIZA_FECHA_Y_HORA_CONTROLADOR_FISCAL_EPSON(  );
 		}
 	}
 }
