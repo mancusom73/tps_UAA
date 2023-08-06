@@ -3114,7 +3114,7 @@ struct _respuesta_napse {
 	long id_evento;         //1
 	long caja_z;            //5
 	long id_transaccion;
-	long autorizacion;       // 9 
+	char autorizacion[50];       // 9 
 	long     ticket;        //13
 	char     autorizacionTelefono[10]; //17
 	long      numero_de_comercio; //27

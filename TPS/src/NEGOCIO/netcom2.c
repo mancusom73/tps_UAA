@@ -3640,7 +3640,7 @@ void SETEOS_VALORES_RESPUESTA_NAPSE( int lecturaTabla)
 		SET_WHERE( sql );
 		RUN_QUERY(NO);
 		if( FOUND2() ) { //encon
-			char autoalfa[11];
+		//	char autoalfa[11];
 
 			tran_temp->importe = transac2->dt.importe; //no deberia ser el total de la tarjeta?
 			/*if( transac2->operacion == _ON_LINE_COMPRA ) {
@@ -3656,8 +3656,10 @@ void SETEOS_VALORES_RESPUESTA_NAPSE( int lecturaTabla)
 				return 1;
 			}
 
-			sprintf(autoalfa,"%li",respuestaNapse->autorizacion);
-			memcpy( tran_temp->autorizacion_alfa, autoalfa,sizeof( transac2->dt.autorizacion_alfa ) );
+			//sprintf(autoalfa,"%li",respuestaNapse->autorizacion);
+			memcpy( tran_temp->autorizacion_alfa, respuestaNapse->autorizacion,10 );
+			tran_temp->autorizacion_alfa[10]= 0;
+
 	/*		0 0 "APROBADA "
 	1 2 "PEDIR AUTORIZACION"
 	2 2 "PEDIR AUTORIZACION"
@@ -3673,7 +3675,7 @@ void SETEOS_VALORES_RESPUESTA_NAPSE( int lecturaTabla)
 			tran_temp->saldo = 0;//tran_temp->saldo;
 			tran_temp->lote = respuestaNapse->lote;
 
-			tran_temp->autorizacion =respuestaNapse->autorizacion;
+			tran_temp->autorizacion =0; 
 			memcpy( tran_temp->nro_cuenta, respuestaNapse->nro_cuenta, sizeof( respuestaNapse->nro_cuenta ) );
 			tran_temp->tasa_aplicada = 0;
 		
