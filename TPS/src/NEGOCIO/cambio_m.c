@@ -367,7 +367,7 @@ int PROCESAR_CAMBIO_MEDIOS_AUTOMATICO( void )
 	
 	if( CantIdAProcesar ) {
 		_caja_z = ( long )( NRO_CAJA )*100000L + ( NRO_Z % 100000L );
-		_snprintf(sql,sizeof(sql)-1,"SELECT SUM(interes) FROM transac2 where enviado = 1 and error = 0 and operacion = 22 and autorizacion > 0 and codigo_de_respuesta = 0 and id_transaccion >= '%ld' and caja_z = '%ld' and ticket NOT IN (SELECT ticket_original FROM transac2 where enviado = 1 and error = 0 and operacion = 23 and codigo_de_respuesta = 0 and caja_z = '%ld')" 
+		_snprintf(sql,sizeof(sql)-1,"SELECT SUM(interes) FROM transac2 where enviado = 1 and error = 0 and operacion = 22 and autorizacion_alfa > 0 and codigo_de_respuesta = 0 and id_transaccion >= '%ld' and caja_z = '%ld' and ticket NOT IN (SELECT ticket_original FROM transac2 where enviado = 1 and error = 0 and operacion = 23 and codigo_de_respuesta = 0 and caja_z = '%ld')" 
 		, id_transaccion, _caja_z, _caja_z );
 		if( DIRECT_DB_QUERY( sql) > 0 ) {
 			GET_DATO( 1, C_DOUBLE, (char *)&importe, 8 );
@@ -677,7 +677,7 @@ int CARGAR_DATOS_CAMBIO_MEDIO( int medio, int submedio )
 
 	_caja_z = ( long )( NRO_CAJA )*100000L + ( NRO_Z % 100000L );
 	_snprintf(sql,sizeof(sql)-1,
-	"enviado = 1 and error = 0 and operacion = 22 and autorizacion > 0 and codigo_de_respuesta = 0 and id_transaccion = '%d' and caja_z = '%ld' and ticket NOT IN (SELECT ticket_original FROM transac2 where enviado = 1 and error = 0 and operacion = 23 and codigo_de_respuesta = 0 and caja_z = '%ld')"
+	"enviado = 1 and error = 0 and operacion = 22 and autorizacion_alfa > 0 and codigo_de_respuesta = 0 and id_transaccion = '%d' and caja_z = '%ld' and ticket NOT IN (SELECT ticket_original FROM transac2 where enviado = 1 and error = 0 and operacion = 23 and codigo_de_respuesta = 0 and caja_z = '%ld')"
 	, id_transaccion, _caja_z, _caja_z  );
 	SET_WHERE( sql );
 
@@ -747,7 +747,7 @@ long PROXIMO_TRANSACCION_CAMBIO_MEDIO_A_PROCESAR( int medio, int submedio, int *
 			id_evento = 0;
 			memset(sql,0,sizeof(sql));
 			_snprintf(sql,sizeof(sql)-1,
-				"SELECT id_evento FROM transac2 where ticket ='%ld' and enviado = 1 and error = 0 and operacion = 22 and autorizacion > 0 and codigo_de_respuesta = 0 and caja_z = '%ld' and ticket NOT IN (SELECT ticket_original FROM transac2 where enviado = 1 and error = 0 and operacion = 23 and codigo_de_respuesta = 0 and caja_z = '%ld')" 
+				"SELECT id_evento FROM transac2 where ticket ='%ld' and enviado = 1 and error = 0 and operacion = 22 and autorizacion_alfa > 0 and codigo_de_respuesta = 0 and caja_z = '%ld' and ticket NOT IN (SELECT ticket_original FROM transac2 where enviado = 1 and error = 0 and operacion = 23 and codigo_de_respuesta = 0 and caja_z = '%ld')" 
 				, nro_cupon, _caja_z, _caja_z );
 				DIRECT_DB_QUERY( sql);
 				GET_DATO(1,C_INT,(char *)&id_evento,4);
@@ -762,7 +762,7 @@ long PROXIMO_TRANSACCION_CAMBIO_MEDIO_A_PROCESAR( int medio, int submedio, int *
 	}
 	_caja_z = ( long )( NRO_CAJA )*100000L + ( NRO_Z % 100000L );
 	_snprintf(sql,sizeof(sql)-1,
-		"id_evento > '%ld' and enviado = 1 and error = 0 and operacion = 22 and autorizacion > 0 and codigo_de_respuesta = 0 and caja_z = '%ld' and ticket NOT IN (SELECT ticket_original FROM transac2 where enviado = 1 and error = 0 and operacion = 23 and codigo_de_respuesta = 0 and caja_z = '%ld')",
+		"id_evento > '%ld' and enviado = 1 and error = 0 and operacion = 22 and autorizacion_alfa > 0 and codigo_de_respuesta = 0 and caja_z = '%ld' and ticket NOT IN (SELECT ticket_original FROM transac2 where enviado = 1 and error = 0 and operacion = 23 and codigo_de_respuesta = 0 and caja_z = '%ld')",
 		id_evento, _caja_z, _caja_z );
 
 	SELECT_TABLE( T_TRANSAC2, TT_ORIG );
