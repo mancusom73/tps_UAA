@@ -905,8 +905,8 @@ double IMPORTE_MEDIO_PROMOCIONADO( int medio, int submedio, double *importe_ingr
 	memset( plan, 0 ,sizeof(plan) );
 	memset( linea1, 0, sizeof(linea1) );
 	memset( linea2, 0 ,sizeof(linea2) );
-	memset( linea3, 0 ,sizeof(linea2) );
-	memset( linea4, 0 ,sizeof(linea2) );
+	memset( linea3, 0 ,sizeof(linea3) );
+	memset( linea4, 0 ,sizeof(linea4) );
 	memset( lineaM, 0, sizeof(lineaM) );
 	memset( lineaP, 0 ,sizeof(lineaP) );
 	memset( nom_submedio, 0 ,sizeof(nom_submedio) );
@@ -1010,7 +1010,7 @@ double IMPORTE_MEDIO_PROMOCIONADO( int medio, int submedio, double *importe_ingr
 
 		//total de lineas a mostrar
 		if( lineas > 0 )
-			descripcion =(char*) malloc(lineas + 100);	
+			descripcion =(char*) malloc(lineas + 150);	
 
 		if( descripcion && lineas ) {
 			memset( descripcion, 0 ,lineas);
@@ -1045,7 +1045,7 @@ double IMPORTE_MEDIO_PROMOCIONADO( int medio, int submedio, double *importe_ingr
 				nom_submedio, precio_final_con_promo + ram_resto);
 			
 			linea3[0]='&';
-			_snprintf( &linea3[1], sizeof(linea2)-1,"-------------------------RESUMEN COMPRA---------------------");
+			_snprintf( &linea3[1], sizeof(linea3)-1,"-------------------------RESUMEN COMPRA---------------------");
 			linea3[60]='&';
 			linea3[61]='&';
 			_snprintf( &linea3[62], sizeof(linea3)-1,"Importe al que Aplic Desc/Rec   $%.2lf",RAM_SUBTOTAL );
