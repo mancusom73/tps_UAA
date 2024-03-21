@@ -575,9 +575,13 @@ int PEDIR_NRO_CLIENTE( int recuadro, int permitir_escape )
     char stringData[50];
     int hay_cli_cargado = 0;
     memset( stringData, 0, 50 );
+	memset( buffer2, 0, 50 );
+	memset( buffer1, 0, 80 );
+	memset( cadena, 0, 30 );
     #endif
 	lectura_banda = 0;
 	_PERMITIR_BANDA = NO;
+	glog("ARRANCA PEDIR CLIENTE",1,1);
     /********************** Cargamos Busquedas de Cliente **********************/
 
     if( ( items = ( struct _menu * )malloc( sizeof( struct _menu ) * opciones_busqueda ) ) != NULL ) {
@@ -610,6 +614,7 @@ int PEDIR_NRO_CLIENTE( int recuadro, int permitir_escape )
                 strcpy( items[y].nom, cad );
                 items[y].tecla = j + 49;
                 items[y].rta = 9;
+				items[y].index = y;
                 y++;
             }
         }
@@ -785,12 +790,14 @@ int PEDIR_NRO_CLIENTE( int recuadro, int permitir_escape )
                 case MULTIPLE:
                     /*-------------------- Prepara la pantalla -----------------------*/
                     rta = 0;
+					glog("BUSQUEDA MULTIPLE",1,1);
                     while( !rta ) {
                         #if defined(INVEL_L) || defined(INVEL_W)
                         rta = MENU( " BUSCAR CLIENTE POR ", items, y, NULL, 52 );
                         #else
                         rta = MENU( 0, 17, " BUSCAR CLIENTE POR ", items, y, 120, 52 );
                         #endif
+						glog("SALE DEL MENU",1,1);
                         switch( rta ) {
                             case _BUSQUEDA_NOMBRE:
                                 mostrar_cliente = 1;
@@ -1058,6 +1065,7 @@ int PEDIR_NRO_CLIENTE( int recuadro, int permitir_escape )
             free( items[i].nom );
         }
         free( items );
+		items =NULL;
     }
     if( permitir_escape && !datos_invalidos ) {
         if( car == 'N' || car == 'n' || LASTKEY() == 27 ) {

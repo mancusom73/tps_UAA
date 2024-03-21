@@ -328,6 +328,7 @@ extern int PROCESAR_PROMOCION( int medio, int submedio );
 
 extern void SET_TARJERTAS_ON( int valor);
 extern int mostrarmensaje;
+void RECUPERAR_EVENTO_IMPORTADO( long *caja_z, long *id_evento, int *caja, int *pos);
 /*****************************************************************************/
 int _consulta_descrip( int comando, char *cadena, int dato, struct _browse *b, double monto, unsigned short cod_medio )
 /*****************************************************************************/
@@ -960,7 +961,7 @@ PAGOS_PIDE_PAGO( int modo, int ( funcion_val ) ( double importe ), int dev_cobro
 				}
 				if( IsCashActivo() ) {
 					SET_MEMORY_CHAR( __ram_venta_fraccion, 0 );
-					ExecuteSSAction( A_MUESTRA_DATOS, T_FLAGS_MEDIO_EXTR_BORRAR, " ", " ", NULL, " ", NULL );
+					ExecuteSSAction( A_MUESTRA_DATOS, T_FLAGS_MEDIO_EXTR_BORRAR, " ", " ", NULL, " ");
 				}
                 break;
             case 32:
@@ -1036,7 +1037,7 @@ PAGOS_PIDE_PAGO( int modo, int ( funcion_val ) ( double importe ), int dev_cobro
 					seguir = SI;
 				}
 				if( IsCashActivo() ) {
-					ExecuteSSAction( A_MUESTRA_DATOS, T_FLAGS_MEDIO_EXTR_BORRAR, " ", " ", NULL, " ", NULL );
+					ExecuteSSAction( A_MUESTRA_DATOS, T_FLAGS_MEDIO_EXTR_BORRAR, " ", " ", NULL, " ");
 				}
 				setHabPing(1); //habilitamos el ping
                 break;
@@ -1134,12 +1135,12 @@ PAGOS_PIDE_PAGO( int modo, int ( funcion_val ) ( double importe ), int dev_cobro
 					&&TARJ[VAR_TARJETAS_TARJETA].tipo_tarjeta & _TIPO_CASH_ADVANCE) {
 					SET_MEMORY_CHAR( __ram_venta_fraccion, 0 );
 					if( IsCashActivo() )
-						ExecuteSSAction( A_MUESTRA_DATOS, T_FLAGS_MEDIO_EXTR_BORRAR, " ", " ", NULL, " ", NULL );
+						ExecuteSSAction( A_MUESTRA_DATOS, T_FLAGS_MEDIO_EXTR_BORRAR, " ", " ", NULL, " " );
 					else{
 						ExecuteSSAction( A_MUESTRA_DATOS, T_FLAGS_MEDIO_EXTR_AGREGAR, "RETIRO ACTIVADO", " ", NULL, NULL ); 
 					}
 				} else
-						ExecuteSSAction( A_MUESTRA_DATOS, T_FLAGS_MEDIO_EXTR_BORRAR, " ", " ", NULL, " ", NULL );
+						ExecuteSSAction( A_MUESTRA_DATOS, T_FLAGS_MEDIO_EXTR_BORRAR, " ", " ", NULL, " " );
 				
 				break;
             case 180:
@@ -6873,6 +6874,7 @@ double CASHPLUS_INGRESA_IMPORTE(  )
 	
 	
 	glog("Lo encontro1",1,1);
+	glog("CASHPLUS_INGRESA_IMPORTE",1,1);
 
 	/*Informo que tarjeta se va ha realizar la extraccion si son mas de una*/
 	for( i = 0; i < RAM_P_PAGO; i++ ) {
@@ -6906,7 +6908,7 @@ double CASHPLUS_INGRESA_IMPORTE(  )
 		} 
 	}
 
-	while(config_tps.MontosValidos[j] > 0 && extraccion == SI ){
+	while(config_tps.MontosValidos[j] > 0 && extraccion == SI && j< 10 ){
 		j++;
 	}
 	VACIAR_KEY();
@@ -6919,6 +6921,7 @@ double CASHPLUS_INGRESA_IMPORTE(  )
 				 items[i].nom = ( char* )&nombres[i][0];
 				 items[i].tecla = ticket + 48;   // para obtener el ascii '1',...'n'
 				 items[i].rta = ticket;
+				 items[i].index = i;
 			}
 		
 			columnas = 2;
@@ -6933,7 +6936,8 @@ double CASHPLUS_INGRESA_IMPORTE(  )
 				rta = MENU( "MONTO EXTRACCION", items, i + 1, cab, columnas );
 						//             rta = Menu( ST( S_TICKETS_EN_ESPERA ), items, i + 1, cab, columnas );
 				 free( cab );
-				if( rta >=0) {
+				 cab = NULL;
+				if( rta >=0 && rta < j) {
 					importe_retiro = config_tps.MontosValidos[rta];
 				}
 			}
@@ -6950,6 +6954,7 @@ double CASHPLUS_INGRESA_IMPORTE(  )
 			 }
 		}
 	}
+	glog("FIN-CASHPLUS_INGRESA_IMPORTE",1,1);
 
     return ( importe_retiro );
 }
@@ -9470,7 +9475,7 @@ int PROCESAR_QR(void)
 }
 
 /*****************************************************************************/
-int RECUPERAR_EVENTO_IMPORTADO( long *caja_z, long *id_evento, int *caja, int *pos)
+void RECUPERAR_EVENTO_IMPORTADO( long *caja_z, long *id_evento, int *caja, int *pos)
 /*****************************************************************************/
 {
 	struct _eventos event_ticket_recup; //estructura del ticket recuperado
