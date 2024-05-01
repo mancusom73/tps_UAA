@@ -9450,17 +9450,28 @@ int PROCESAR_QR(void)
 
 						GRABAR_LOG_SISTEMA( mensa ,LOG_VENTAS,2);
 						if( retval == 3) {
+							char id_interno[10];
+							char trans_id[100];
+							_snprintf(trans_id, sizeof(trans_id)-1, "%strans_id.txt",GET_PATH_BINARIO());
 							sprintf(numero_tar,"%i%li%li%i%i",sucursal,caja_z, ram_id_evento, posicion,reintento);
 							numero_tar[20]=0;
 							_SET_MEMORY( __pago_nro_tarjeta, i, numero_tar ); //guardemos aqui
 							if(cuenta ==2) { //aca recupero el nro interno de la operacion, la que sale en la app mobile
-								char id_interno[10];
-								char trans_id[100];
-								_snprintf(trans_id, sizeof(trans_id)-1, "%strans_id.txt",GET_PATH_BINARIO());
+								
 								
 								if( CARGAR_ARCHIVO_QR( trans_id,id_interno, sizeof(id_interno )) == 1 
 									&& strlen(id_interno)> 4)
 									_SET_MEMORY( __pago_auto_tarjeta, i, id_interno );
+							} else {
+								if(cuenta ==1) { //mercadopago no necesita ningun codigo pero usamos si existe el archivo para tomar como correcta la operacion
+									//sino existe es que fallo
+									if( CARGAR_ARCHIVO_QR( trans_id,id_interno, sizeof(id_interno )) == 0) {
+										//no existe el archivo quiere decir que no termino ok
+										retval = 2;
+										GRABAR_LOG_SISTEMA( "NO SE ENCONRO EL ARCHIVO trans_id.txt POR ESO SE DA POR ERROR" ,LOG_VENTAS,2);
+									}
+
+								}
 							}
 						}
 					}

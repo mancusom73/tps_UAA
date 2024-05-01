@@ -29,18 +29,18 @@
 Global $Aprobada = 2
 
 ;~ HotKeySet("{ESC}", "_Terminate")
-HotKeySet("{UP}", "_Arriba")
-HotKeySet("{DOWN}", "_Abajo")
+;HotKeySet("{UP}", "_Arriba")
+;HotKeySet("{DOWN}", "_Abajo")
 HotKeySet("{Enter}", "_PressButton")
-HotKeySet("{Enter}", "_PressButton")
-HotKeySet("{C}", "_PressButton3")
-HotKeySet("{c}", "_PressButton3")
-HotKeySet("{B}", "_PressButton2")
-HotKeySet("{b}", "_PressButton2")
-HotKeySet("{A}", "_PressButton1")
-HotKeySet("{a}", "_PressButton1")
-HotKeySet("{LEFT}", "_PressButtonLeft")
-HotKeySet("{RIGHT}", "_PressButtonRight")
+;HotKeySet("{Enter}", "_PressButton")
+;HotKeySet("{C}", "_PressButton3")
+;HotKeySet("{c}", "_PressButton3")
+;HotKeySet("{B}", "_PressButton2")
+;HotKeySet("{b}", "_PressButton2")
+;HotKeySet("{A}", "_PressButton1")
+;HotKeySet("{a}", "_PressButton1")
+;HotKeySet("{LEFT}", "_PressButtonLeft")
+;HotKeySet("{RIGHT}", "_PressButtonRight")
 
 
 
@@ -72,10 +72,11 @@ Global CONST $WinHttpRequestOption_SslErrorIgnoreFlags_IgnoreAll       = 0x3300 
 
 
 Global CONST $MaxIntentos = 40
-Global $Titulo = "MercadoPago POS 2.70"
+Global $Titulo = "MercadoPago POS 3.50"
 Global $blinkear = 0
 Global $reintentos =0
 Global $errorformato = 0
+Local $huboerror = 0
 
 GlobaL $ModoProduccion = True
 $RED = 1
@@ -128,14 +129,14 @@ $lstbody = GUICtrlCreateList("", 256, 32, 281, 81, BitOR($LBS_STANDARD, $LBS_EXT
 ;~ $lstjson = GUICtrlCreateList("", 520, 421, 281, 110, BitOR($ES_WANTRETURN,$WS_HSCROLL,$WS_VSCROLL))
 $Label1 = GUICtrlCreateLabel("Respu  Token", 256, 8, 81, 17)
 $Label2 = GUICtrlCreateLabel("Respuesta json", 528, 300, 77, 17)
-$btnloguin = GUICtrlCreateButton("Obtener Merchar orden", 48, 40, 185, 49)
+;$btnloguin = GUICtrlCreateButton("Obtener Merchar orden", 48, 40, 185, 49)
 
-$btngenerarorden = GUICtrlCreateButton("A -Generar Orden", 64, 30, 169, 81,0)
-GUICtrlSetImage($btngenerarorden, "shell32.dll", 241,1)
+;$btngenerarorden = GUICtrlCreateButton("A -Generar Orden", 64, 30, 169, 81,0)
+;GUICtrlSetImage($btngenerarorden, "shell32.dll", 241,1)
 ;la parte de atras del boton simulando borde
-$atras1 = GUICtrlCreateLabel("", 62, 28, 173, 85, $WS_CLIPSIBLINGS)
-GUICtrlSetBkColor(-1, 0x0000FF)
-GUICtrlSetState(-1, $GUI_DISABLE)
+;$atras1 = GUICtrlCreateLabel("", 62, 28, 173, 85, $WS_CLIPSIBLINGS)
+;GUICtrlSetBkColor(-1, 0x0000FF)
+;GUICtrlSetState(-1, $GUI_DISABLE)
 
 
 $monto = GUICtrlCreateInput(StringFormat("%#.2f", 0), 256, 160, 121, 21)
@@ -143,23 +144,23 @@ $monto = GUICtrlCreateInput(StringFormat("%#.2f", 0), 256, 160, 121, 21)
 GUICtrlSetState(-1, $GUI_DISABLE)
 $Label3 = GUICtrlCreateLabel("Monto orden", 256, 136, 64, 17)
 $btnobtener = GUICtrlCreateButton("Obtener Orden Publicada", 288, 256, 169, 81)
-$btnsalir = GUICtrlCreateButton("B -Salir", 64, 120, 169, 81, $WS_BORDER)
-GUICtrlSetImage($btnsalir , "shell32.dll", 28,1)
+;$btnsalir = GUICtrlCreateButton("B -Salir", 64, 120, 169, 81, $WS_BORDER)
+;GUICtrlSetImage($btnsalir , "shell32.dll", 28,1)
 
 ;la parte de atras del boton simulando borde
-$atras2 = GUICtrlCreateLabel("", 62,118, 173, 85, $WS_CLIPSIBLINGS)
-GUICtrlSetBkColor(-1, 0x0000FF)
-GUICtrlSetState(-1, $GUI_DISABLE)
-GUICtrlSetState( -1, $GUI_HIDE)
+;$atras2 = GUICtrlCreateLabel("", 62,118, 173, 85, $WS_CLIPSIBLINGS)
+;GUICtrlSetBkColor(-1, 0x0000FF)
+;GUICtrlSetState(-1, $GUI_DISABLE)
+;GUICtrlSetState( -1, $GUI_HIDE)
 
 $btnaborrarorden = GUICtrlCreateButton("C -Borrar Orden Pendiente", 64, 376, 169, 65, $WS_BORDER)
 GUICtrlSetImage($btnaborrarorden , "shell32.dll", 200,1)
 
 ;la parte de atras del boton simulando borde
-$atras3 = GUICtrlCreateLabel("", 62,374, 173, 69, $WS_CLIPSIBLINGS)
-GUICtrlSetBkColor(-1, 0x0000FF)
-GUICtrlSetState(-1, $GUI_DISABLE)
-GUICtrlSetState( -1, $GUI_HIDE)
+;$atras3 = GUICtrlCreateLabel("", 62,374, 173, 69, $WS_CLIPSIBLINGS)
+;GUICtrlSetBkColor(-1, 0x0000FF)
+;GUICtrlSetState(-1, $GUI_DISABLE)
+;GUICtrlSetState( -1, $GUI_HIDE)
 
 $txtcodigorespuesta = GUICtrlCreateInput("", 544, 72, 73, 21)
 GUICtrlSetFont(-1, 8, 800, 0, "MS Sans Serif")
@@ -193,8 +194,8 @@ GUICtrlCreateLabel("Importe Orden", 408, 152, 89, 20)
 GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
 
 ;~ $lblmensajes = GUICtrlCreateLabel("_", 16, 496, 487, 40)
-$lblmensajes = GUICtrlCreateLabel("_", 16, 350, 487, 40)
-GUICtrlSetFont(-1, 12, 400, 0, "MS Sans Serif")
+$lblmensajes = GUICtrlCreateLabel("_", 48, 40, 350, 312)
+GUICtrlSetFont(-1, 14, 800, 0, "MS Sans Serif")
 GUICtrlSetColor(-1, 0xFF0000)
 $btncambiarmonto = GUICtrlCreateButton("Camb Monto de Devolucion", 256, 184, 157, 25)
 $btncambiarorden = GUICtrlCreateButton("Camb Nro de orden", 256, 210, 137, 25)
@@ -245,13 +246,15 @@ $levantado = LevantadoQR2()
 if $levantado = 0 Then
    Log2("NO HAY CONEXION CON EL SERVICIO DE MERCADO PAGO ")
    MsgBox(48 + $MB_SYSTEMMODAL, "ERROR GRAVE", "NO HAY CONEXION CON EL SERVICIO DE MERCADO PAGO " & @CRLF &  "POR FAVOR AVISE AL SUPERVISOR - Sale en 3 Seg", 3  )
-     Exit(2)
+     FocusTPS()
+	 Exit(2)
 EndIf
 
 if( AccesTokendeHoy() = -1) Then
    Log2("NO PUDO PEDIR TOKEN SERVIDOR ")
    MsgBox(48 + $MB_SYSTEMMODAL, "ERROR GRAVE", "NO SE PUDO OBTENER AUTORIZACION DEL SERVIDOR " & @CRLF &  "POR FAVOR AVISE AL SUPERVISOR - Sale en 3 Seg",3  )
-     Exit(2)
+     FocusTPS()
+	 Exit(2)
 EndIf
 CargarToken()
 #EndRegion ### END Koda GUI section ###
@@ -278,7 +281,7 @@ Sleep(1000)
 Log2("Click en generar orden ")
 DesactivarMensaje()
 $reintentos = 0
-GUICtrlSetState($btngenerarorden ,$GUI_DISABLE)
+;GUICtrlSetState($btngenerarorden ,$GUI_DISABLE)
 HotKeySet("{Enter}")
 if( $EsDevolucion = 0) Then
    TratarOrden()
@@ -299,26 +302,26 @@ While 1
 			MsgBox($MB_SYSTEMMODAL, "", "Trayendo ordenes pendientes")
 ;~ 			ObtenerOrden( false )
 			EnviarRequest(2)
-		 Case $btnloguin
-		 DesactivarMensaje()
+;		 Case $btnloguin
+;		 DesactivarMensaje()
 ;~ 			merchar order
 ;~ 			EnviarRequest(4)
 ;~ aca pruebo leer
-			LeerJsonCompuesto(4)
-		 Case $btngenerarorden
-			Log2("Click en generar orden ")
-			 DesactivarMensaje()
+;			LeerJsonCompuesto(4)
+;		 Case $btngenerarorden
+;			Log2("Click en generar orden ")
+;			 DesactivarMensaje()
 ;~ 			GenerarOrden()
-			$reintentos = 0
-			GUICtrlSetState($btngenerarorden ,$GUI_DISABLE)
-			HotKeySet("{Enter}")
-			if( $EsDevolucion = 0) Then
-			   TratarOrden()
-			Else
+;			$reintentos = 0
+;			GUICtrlSetState($btngenerarorden ,$GUI_DISABLE)
+;			HotKeySet("{Enter}")
+;			if( $EsDevolucion = 0) Then
+;			   TratarOrden()
+;			Else
 ;~ 			   validemos que sea un numero lo ingresado
-
+;
 			   Devolucion( GUICtrlRead($txtnroorden ))
-			 EndIf
+;			 EndIf
 
 		 Case $btnaborrarorden
 			 DesactivarMensaje()
@@ -334,9 +337,9 @@ While 1
 ;~ 			   MsgBox($MB_SYSTEMMODAL, '',StringFormat("$"& "%#.2f", GUICtrlRead($monto )) )
 		 case $btncambiarorden:
 			LeerNroOrden()
-		 case $btnsalir
-			ConsoleWrite2("Boton salir Salgo con codigo " & $Aprobada & @LF)
- 			Exit $Aprobada
+;		 case $btnsalir
+;			ConsoleWrite2("Boton salir Salgo con codigo " & $Aprobada & @LF)
+ ;			Exit $Aprobada
 		 case $txtcambiarmonto
 			If GUICtrlRead($txtcambiarmonto) = $GUI_CHECKED Then
 ;~                 GUICtrlSetState($monto, $GUI_ENABLE)
@@ -365,7 +368,7 @@ WEnd
 Func Desactivar()
    GUICtrlSetState( $Label1 , $GUI_HIDE)
    GUICtrlSetState( $Label2, $GUI_HIDE)
-   GUICtrlSetState($btnloguin, $GUI_HIDE)
+   ;GUICtrlSetState($btnloguin, $GUI_HIDE)
 
 
    GUICtrlSetState($btnaborrarorden, $GUI_HIDE)
@@ -384,8 +387,8 @@ Func Desactivar()
    GUICtrlSetState($btncambiarmonto, $GUI_DISABLE)
 
    if( $ModoProduccion = False) Then
-	  GUICtrlSetData($btngenerarorden, "NO DISPONIBLE")
-	  GUICtrlSetState( $btngenerarorden, $GUI_DISABLE)
+	  ;GUICtrlSetData($btngenerarorden, "NO DISPONIBLE")
+	  ;GUICtrlSetState( $btngenerarorden, $GUI_DISABLE)
 	   ActivarMensaje()
 	   SetearTxt("MODO PRUEBA - NO OPERATIVO ", $lblmensajes)
 
@@ -396,7 +399,7 @@ Func Desactivar()
 	  GUICtrlSetState($btncambiarmonto, $GUI_HIDE)
 	  GUICtrlSetState($txtcambiarmonto,$GUI_HIDE)
    Else
-	  GUICtrlSetData($btngenerarorden, "A -Devolucion Orden")
+	  ;GUICtrlSetData($btngenerarorden, "A -Devolucion Orden")
 	  GUICtrlSetState(  $monto, $GUI_DISABLE)
 
    EndIf
@@ -418,24 +421,34 @@ EndIf
 Local $respu= 1
 While $reintentos <= $MaxIntentos And $accion =  2
 ;~     MsgBox($MB_SYSTEMMODAL, "", "Value of $i is: " & $i)
+
+	; Delete el archivo
+	Local $iDelete = FileDelete(@ScriptDir & "\trans_id.txt")
+	If $iDelete Then
+		ConsoleWrite2("Borrado archivo trans_id ok "  & @LF)
+	Else
+		ConsoleWrite2("Borrado archivo trans_id FALLO O NO EXISTE"  & @LF)
+	EndIf
     ConsoleWrite2("Mando consulta mercharorder " & @LF)
 	$accion =  EnviarRequest(4)
 	 ConsoleWrite2("Respuesta merchar " & $accion  & @LF)
     $reintentos = $reintentos + 1
 	ActivarMensaje()
-    GUICtrlSetData($lblmensajes,"ESPERANDO LECTURA QR")
-    if(IsPar($reintentos) = True ) Then
-	  $respu = MsgBox($MB_YESNO + $MB_ICONQUESTION + $MB_SYSTEMMODAL, "MENSAJE POS","DESEA SEGUIR ESPERANDO...", 10  )
-	  if( $respu = $IDNO ) Then
+    GUICtrlSetData($lblmensajes,"ESPERANDO LECTURA QR" & @LF & @LF & "****ESPERE POR FAVOR****")
+    ;if(IsPar($reintentos) = True ) Then
+	if( Mod($reintentos, 3) = 0 ) Then  ;cada 3 preguntanmos
+	  $respu = MsgBox($MB_YESNO + $MB_ICONQUESTION + $MB_SYSTEMMODAL +$MB_DEFBUTTON2, "MENSAJE POS","DESEA CANCELAR? " & @CRLF & "PRESIONE S o Y ...SINO CONTINUA SOLO EN 5 SEG", 8  )
+	  if( $respu = $IDYES ) Then
 		 $reintentos = $MaxIntentos + 1 ; para salir
 		 GUICtrlSetData($lblmensajes,"CANCELANDO ORDEN ENVIADA")
+		 ConsoleWrite2("Cancelo el cajero seguir esperando " & @LF)
 	  EndIf
 	  ;~ 	espero 5 segundos
    EndIf
-   if( $respu <> $IDNO ) Then
+   if( $respu <> $IDNO and $accion <> 0 ) Then
 	  Sleep(5000)
 	EndIf
-
+    $respu= 1
 	ConsoleWrite2("Reitentos: " & $reintentos & "accion "& $accion & @LF)
 WEnd
 if( $reintentos > $MaxIntentos ) Then
@@ -447,7 +460,7 @@ if( $reintentos > $MaxIntentos ) Then
 		  ConsoleWrite2("ORDEN ANULADA" & @LF)
 		 EnviarRequest(3)
 Else
-	  if( $accion = 0) Then
+	  if( $accion = 0 and $huboerror = 0 ) Then
 ;~    aca salio porque encontro la merchar order
 		  MsgBox($MB_OK + $MB_ICONINFORMATION + $MB_SYSTEMMODAL, "MENSAJE MERCADOPAGO","SE REGISTRO EL PAGO EN MERCADOPAGO MUCHAS GRACIAS Sale en 3 Seg", 3 )
 ;~ 		  ConsoleWrite("1 - se registro"& @LF)
@@ -526,6 +539,14 @@ if( $EsDevolucion = 1 ) Then
 EndIf
 
 $ordenaleatoria = GenerarOrdenAleatoria()
+
+;busco por si quedo de pluspago el tag para borrarlo
+Local $valorkey = Json_ObjExists($Data2, "id_transaccion_interno")
+if( $valorkey ) Then
+	Json_ObjDelete($Data2,"id_transaccion_interno")
+	ConsoleWrite2("Borro referencia_orden de pluspago que no va "& @LF)
+	Json_ObjPut($Data2, "referencia_orden", $ordenaleatoria)
+endif
 
 Local $valorkey = Json_ObjExists($Data2, "referencia_orden")
 
@@ -681,7 +702,8 @@ ConsoleWrite2(@CRLF & "Executing API TIPO MENSAJE " &$tipo_mensaje & @CRLF)
  $oHttp = ObjCreate("winhttp.winhttprequest.5.1")
     If @error Then
         ConsoleWrite2("Unable to create http request object." & @CRLF)
-        Exit -1
+        FocusTPS()
+		Exit -1
     EndIf
  ConsoleWrite2("WinHttpRequest object created." & @CRLF)
  $oHttp.Option($WinHttpRequestOption_SslErrorIgnoreFlags) = $WinHttpRequestOption_SslErrorIgnoreFlags_IgnoreAll
@@ -765,7 +787,7 @@ if( @error = -2147352567) Then
 
 	  ActivarMensaje()
 	  GUICtrlSetData($lblmensajes,"ERROR DE COMUNICACION - REINTENTE DE NUEVO")
-	  GUICtrlSetState($btngenerarorden ,$GUI_ENABLE)
+	  ;GUICtrlSetState($btngenerarorden ,$GUI_ENABLE)
 	  if($tipo_mensaje = 4) Then
 		 Return 1
 	  EndIf
@@ -820,6 +842,7 @@ EndFunc
 
 Func Quehacemo($iHttpStatus, $sResponse, $tipo_mensaje)
 ;~ 0 ok  1 error  2 reintentar
+ ConsoleWrite2('Quehacemo httpStatus' & $iHttpStatus &  @LF)
    Switch $iHttpStatus
    Case 401
 	  ConsoleWrite2('FALLO AUTENTICACION PEDIMOS TOKEN DE SEGURIDAD' & @CRLF)
@@ -886,7 +909,7 @@ Func CargarDatos( $istoken)
 
 	Local $Data2 = Json_Decode($Json2)
 	Local $Json3 = Json_Encode($Data2)
-	ConsoleWrite("Test1 Result: " & $Json3 & @LF)
+	ConsoleWrite2("Test1 Result: " & $Json3 & @LF)
 
 	For $i = 0 to UBound($aKeys) -1
 ;~         ConsoleWrite('Busco = ' & $aKeys[$i] & @LF)
@@ -920,7 +943,7 @@ Func CargarDatos( $istoken)
  Func LeerJsonCompuesto($tipo_mensaje)
   ConsoleWrite2("Leer Json  Received.html" & @CRLF)
  Local $huborespuesta = 0
- Local $huboerror = 0
+ $huboerror = 0
  $file = FileOpen("Received.html", $FO_READ)
  Local $Json1 = FileRead($file)
  FileClose($file)
@@ -944,6 +967,14 @@ Func CargarDatos( $istoken)
 			 ConsoleWrite2("hay error reportado por servidor" & @LF)
 			 $huboerror = 1
 		  EndIf
+		  Local $newcode = Json_ObjGet($Data2, "code")
+		;  ConsoleWrite2("Nuevo code " & $newcode & @TAB &  $tipo_mensaje & @LF)
+		  Local $newcode = Json_ObjGet($Data2, "code")
+		  if StringCompare ( $newcode, "404",0 ) = 0 Then
+			 ConsoleWrite2("hay error reportado por servidor mal formato" & @LF)
+			 $huboerror = 1
+		  EndIf
+
 
 	   Else
 			$mp_status = "200"
@@ -987,6 +1018,7 @@ Func CargarDatos( $istoken)
 	 SetearTxt(0,$txtimporteorden)
 	 $Aprobada = 2
      $errorformato = 1
+	 $huboerror = 1
 	 Return 1
   EndIf
 
@@ -1090,7 +1122,12 @@ if ($tipo_mensaje = 6) Then ;veamos si hay o Not
    Local $status = functionOfMyDreams($Obj, "respuesta", "status")
    ConsoleWrite2('Status id_pago ' & $status &  @LF)
    if( $status = "approved" ) Then
-		 Return 0
+   ;aca lo aprobo grabemos el archivo
+		Local $hFileOpen = FileOpen(@ScriptDir & "\trans_id.txt", $FO_OVERWRITE)
+		FileWrite($hFileOpen, 111111)
+		FileFlush($hFileOpen)
+		FileClose($hFileOpen)
+		Return 0
    Else  ; no se pudo devolver
 		 Return 1
    EndIf
@@ -1154,7 +1191,8 @@ Func post_authentication_test()
     $oHttp = ObjCreate("winhttp.winhttprequest.5.1")
     If @error Then
         ConsoleWrite2("Unable to create http request object." & @CRLF)
-        Exit -1
+        FocusTPS()
+		Exit -1
     EndIf
     ConsoleWrite2("WinHttpRequest object created." & @CRLF)
 
@@ -1169,7 +1207,7 @@ Func post_authentication_test()
 ;~   		.Open("POST", "https://run.mocky.io/v3/d8c8de02-fd37-4ee0-9a64-2e20d8bc2c1f---caulq", False)
 
         .SetRequestHeader("Content-Type", "application/json")
-        .Send('{"strategy": "local","email": "admin","password": "admin"}')
+        .Send('{"strategy": "local","email": "admin","password": "TheQueeN.20"}')
  		.WaitForResponse()
 ;~ en teoria si el open tiene false no hace falta esto
 
@@ -1256,7 +1294,8 @@ Func ActivarMensaje()
 EndFunc
 
 Func _Terminate()
-    Exit
+    FocusTPS()
+	Exit
  EndFunc   ;==>_Terminate
 
  Func IsPar($numner)
@@ -1269,46 +1308,46 @@ Func _Terminate()
 
  Func _Arriba()
 ;~     MsgBox($MB_SYSTEMMODAL, "", "This is a message.")
-ControlFocus($Form1 ,$Titulo,$btngenerarorden)
-GUICtrlSetState( $atras3, $GUI_HIDE)
-GUICtrlSetState( $atras2, $GUI_HIDE)
-GUICtrlSetState( $atras1, $GUI_SHOW)
+;ControlFocus($Form1 ,$Titulo,$btngenerarorden)
+;GUICtrlSetState( $atras3, $GUI_HIDE)
+;GUICtrlSetState( $atras2, $GUI_HIDE)
+;GUICtrlSetState( $atras1, $GUI_SHOW)
 EndFunc   ;==>ShowMessage
 
 Func _Abajo()
 ;~     MsgBox($MB_SYSTEMMODAL, "", "This is a message.")
-ControlFocus($Form1 ,$Titulo,$btnsalir)
+;ControlFocus($Form1 ,$Titulo,$btnsalir)
 
-GUICtrlSetState( $atras2, $GUI_SHOW)
-GUICtrlSetState( $atras1, $GUI_HIDE)
-GUICtrlSetState( $atras3, $GUI_HIDE)
+;GUICtrlSetState( $atras2, $GUI_SHOW)
+;GUICtrlSetState( $atras1, $GUI_HIDE)
+;GUICtrlSetState( $atras3, $GUI_HIDE)
 
 EndFunc   ;==>ShowMessage
 
 Func _PressButton()
 ;~     MsgBox($MB_SYSTEMMODAL, "", "This is a message.")
-Send("{SPACE}")
+;Send("{SPACE}")
 EndFunc   ;==>ShowMessage
 
 Func _PressButton1()
-ControlFocus($Form1 ,$Titulo,$btngenerarorden)
-GUICtrlSetState( $atras3, $GUI_HIDE)
-GUICtrlSetState( $atras2, $GUI_HIDE)
-GUICtrlSetState( $atras1, $GUI_SHOW)
+;ControlFocus($Form1 ,$Titulo,$btngenerarorden)
+;GUICtrlSetState( $atras3, $GUI_HIDE)
+;GUICtrlSetState( $atras2, $GUI_HIDE)
+;GUICtrlSetState( $atras1, $GUI_SHOW)
 EndFunc   ;==>ShowMessage
 
 Func _PressButton2()
-ControlFocus($Form1 ,$Titulo,$btnsalir)
-GUICtrlSetState( $atras2, $GUI_SHOW)
-GUICtrlSetState( $atras1, $GUI_HIDE)
-GUICtrlSetState( $atras3, $GUI_HIDE)
+;ControlFocus($Form1 ,$Titulo,$btnsalir)
+;GUICtrlSetState( $atras2, $GUI_SHOW)
+;GUICtrlSetState( $atras1, $GUI_HIDE)
+;GUICtrlSetState( $atras3, $GUI_HIDE)
 EndFunc   ;==>ShowMessage
 
 Func _PressButton3()
 ControlFocus($Form1 ,$Titulo,$btnaborrarorden)
-GUICtrlSetState( $atras2, $GUI_HIDE)
-GUICtrlSetState( $atras3, $GUI_SHOW)
-GUICtrlSetState( $atras1, $GUI_HIDE)
+;GUICtrlSetState( $atras2, $GUI_HIDE)
+;GUICtrlSetState( $atras3, $GUI_SHOW)
+;GUICtrlSetState( $atras1, $GUI_HIDE)
 EndFunc   ;==>ShowMessage
 
 Func _PressButtonLeft()
@@ -1671,5 +1710,27 @@ EndFunc
 
 Func Salida()
    ConsoleWrite2("Boton salir Salgo con codigo " & $Aprobada & @LF)
+   FocusTPS()
    Exit $Aprobada
+EndFunc
+
+Func FocusTPS()
+   Local $aList = WinList()
+	Local $Titulo = "TPS - V"
+	Local $Titulo2 = "TPV 1000 - IV"
+
+	Local $activado = 0
+
+	 if WinExists ( $Titulo ) Then
+		$activado = 1
+	  EndIf
+
+	  if WinExists ( $Titulo2  ) Then
+		 $activado = 1
+	   EndIf
+
+
+    If $activado = 1 and WinActivate( $Titulo2 , "") = 0  Then
+		WinActivate( $Titulo , "")
+	EndIf
 EndFunc
